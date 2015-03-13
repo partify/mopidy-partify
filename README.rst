@@ -10,12 +10,12 @@ Mopidy-Partify
     :target: https://pypi.python.org/pypi/Mopidy-Partify/
     :alt: Number of PyPI downloads
 
-.. image:: https://img.shields.io/travis/bengreenier/mopidy-partify/master.png?style=flat
-    :target: https://travis-ci.org/bengreenier/mopidy-partify
+.. image:: https://img.shields.io/travis/partify/mopidy-partify/master.png?style=flat
+    :target: https://travis-ci.org/partify/mopidy-partify
     :alt: Travis CI build status
 
-.. image:: https://img.shields.io/coveralls/bengreenier/mopidy-partify/master.svg?style=flat
-   :target: https://coveralls.io/r/bengreenier/mopidy-partify?branch=master
+.. image:: https://img.shields.io/coveralls/partify/mopidy-partify/master.svg?style=flat
+   :target: https://coveralls.io/r/partify/mopidy-partify?branch=master
    :alt: Test coverage
 
 Mopidy extension for partify - crowdsourcing music at the party
@@ -45,9 +45,9 @@ Mopidy-Partify to your Mopidy configuration file::
 Project resources
 =================
 
-- `Source code <https://github.com/bengreenier/mopidy-partify>`_
-- `Issue tracker <https://github.com/bengreenier/mopidy-partify/issues>`_
-- `Development branch tarball <https://github.com/bengreenier/mopidy-partify/archive/master.tar.gz#egg=Mopidy-Partify-dev>`_
+- `Source code <https://github.com/partify/mopidy-partify>`_
+- `Issue tracker <https://github.com/partify/mopidy-partify/issues>`_
+- `Development branch tarball <https://github.com/partify/mopidy-partify/archive/master.tar.gz#egg=Mopidy-Partify-dev>`_
 
 
 Changelog
