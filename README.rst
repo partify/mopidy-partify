@@ -28,9 +28,6 @@ Install by running::
 
     pip install Mopidy-Partify
 
-Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-<http://apt.mopidy.com/>`_.
-
 
 Configuration
 =============
@@ -39,7 +36,9 @@ Before starting Mopidy, you must add configuration for
 Mopidy-Partify to your Mopidy configuration file::
 
     [partify]
-    # TODO: Add example of extension config
+    service = partify.io
+    room = dev
+    protected = false
 
 
 Project resources
