@@ -24,9 +24,9 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        # TODO: Comment in and edit, or remove entirely
-        # schema['username'] = config.String()
-        # schema['password'] = config.Secret()
+        schema['service'] = config.Hostname()
+        schema['room'] = config.String()
+        schema['protected'] = config.Boolean()
         return schema
 
     def setup(self, registry):

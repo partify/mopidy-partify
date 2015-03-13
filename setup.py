@@ -18,7 +18,7 @@ setup(
     license='Apache License, Version 2.0',
     author='Ben Greenier',
     author_email='ben@bengreenier.com',
-    description='Mopidy extension for partify - crowdsourcing music at the party',
+    description='Mopidy extension for partify - crowdsourcing music at the party',  # noqa
     long_description=open('README.rst').read(),
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
