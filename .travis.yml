@@ -13,6 +13,8 @@ install:
   - "sudo apt-get update || true"
   - "sudo apt-get install mopidy"
   - "pip install tox"
+  - "pip install uuid"
+  - "pip install pydblite"
 
 script:
   - "tox -e $TOX_ENV"
