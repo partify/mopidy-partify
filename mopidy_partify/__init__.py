@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
-import os
 import logging
+import os
 import tornado.web
-import tornado.websocket
 import pydblite as pydb
+import tornado.websocket
 import uuid
 
 from mopidy import config, ext
