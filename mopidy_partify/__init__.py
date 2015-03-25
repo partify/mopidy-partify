@@ -65,7 +65,7 @@ def app_factory(config, core):
     ]
 
 
-class PartifyExtension(ext.Extension):
+class Extension(ext.Extension):
     dist_name = 'Mopidy-Partify'
     ext_name = 'partify'
     version = __version__
@@ -75,7 +75,7 @@ class PartifyExtension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = super(PartifyExtension, self).get_config_schema()
+        schema = super(Extension, self).get_config_schema()
         schema['service'] = config.Hostname()
         schema['room'] = config.String()
         schema['protected'] = config.Boolean()

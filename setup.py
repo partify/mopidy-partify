@@ -27,6 +27,8 @@ setup(
         'setuptools',
         'Mopidy >= 0.18',
         'Pykka >= 1.1',
+        'pydblite >= 3.0',
+        'uuid >= 1.3'
     ],
     entry_points={
         'mopidy.ext': [

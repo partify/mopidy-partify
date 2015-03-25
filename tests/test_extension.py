@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
-from mopidy_partify import PartifyExtension
+from mopidy_partify import Extension
 
 
 def test_get_default_config():
-    ext = PartifyExtension()
+    ext = Extension()
 
     config = ext.get_default_config()
 
@@ -16,7 +16,7 @@ def test_get_default_config():
 
 
 def test_get_config_schema():
-    ext = PartifyExtension()
+    ext = Extension()
 
     schema = ext.get_config_schema()
 
