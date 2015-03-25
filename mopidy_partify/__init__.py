@@ -2,12 +2,16 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import pydblite as pydb
+
 import uuid
+
+from mopidy import config, ext
+
+import pydblite as pydb
+
 import tornado.web
 import tornado.websocket
 
-from mopidy import config, ext
 
 __version__ = '0.0.1'
 __static_path__ = 'static'
@@ -28,20 +32,26 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.write_message("Hello World")
 
     def on_message(self, message):
-        if (hasattr(message, 'vtype')):
+        if (hasattr(message, 'vtype') and hasattr(message, 'uri')):
             db.insert(id=self.id, uri=message.uri, vote=message.vtype)
             self.write_message({'status': "OK"})
-            self.updateOthers(self, message.vtype)
+            self.updateOthers(self, message.vtype, message.uri)
         else:
-            self.write_message({'error': "specify vtype upvote or downvote"})
+            self.write_message
+            (
+                {
+                    'error':
+                    "msg should have {vtype:'upvote'||'downvote', uri:''}"
+                }
+            )
 
     def on_close(self):
         others.remove(self)
 
-    def update_others(self, vtype):
+    def update_others(self, vtype, uri):
         for other in others:
             if (other != self):
-                other.write_message({'vtype': vtype})
+                other.write_message({'vtype': vtype, 'uri': uri})
 
 
 def app_factory(config, core):
