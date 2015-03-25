@@ -7,3 +7,4 @@ MANIFEST
 build/
 dist/
 xunit-py27.xml
+votes.pdl

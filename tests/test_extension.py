@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
-from mopidy_partify import Extension
+from mopidy_partify import PartifyExtension
 
 
 def test_get_default_config():
-    ext = Extension()
+    ext = PartifyExtension()
 
     config = ext.get_default_config()
 
@@ -16,13 +16,10 @@ def test_get_default_config():
 
 
 def test_get_config_schema():
-    ext = Extension()
+    ext = PartifyExtension()
 
     schema = ext.get_config_schema()
 
     assert 'service' in schema
     assert 'room' in schema
     assert 'protected' in schema
-
-
-# TODO Write more tests
