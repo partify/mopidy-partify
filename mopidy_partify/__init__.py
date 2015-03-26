@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.21'
+__version__ = '0.1.0'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
