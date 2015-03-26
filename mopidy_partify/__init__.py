@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.15'
+__version__ = '0.0.16'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -58,6 +58,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 and
                 len(votes) >= (len(others) / 2)
             ):
+                logger.info("Partify skipping track")
                 self.core.playback.next()
                 db.delete(votes)
             logger.info("Partify processed vote")
