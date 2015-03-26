@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -85,3 +85,4 @@ class PartifyExtension(ext.Extension):
             'name': self.ext_name,
             'path': os.path.join(os.path.dirname(__file__), __static_path__),
         })
+        logger.info("Registered partify as http:static")

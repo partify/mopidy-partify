@@ -6,3 +6,4 @@ include README.rst
 include mopidy_partify/ext.conf
 
 recursive-include tests *.py
+recursive-include mopidy_partify/static *
