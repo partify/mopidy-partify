@@ -6,7 +6,7 @@ import os
 
 import uuid
 
-from mopidy import config, ext
+from mopidy import config, core, ext
 
 import pydblite as pydb
 
@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.11'
+__version__ = '0.0.12'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -28,6 +28,7 @@ others = []
 class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.id = uuid.uuid4()
+        self.core = core
         others.append(self)
 
         self.write_message("Hello World")
@@ -35,10 +36,24 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         msg = json.loads(message)
-        if (msg.has_key('vtype') and msg.has_key('uri')):
+        if ('vtype' in msg and 'uri' in msg):
             db.insert(id=self.id, uri=msg['uri'], vote=msg['vtype'])
+            db.commit()
             self.write_message({'status': "OK"})
-            self.updateOthers(self, msg['vtype'], msg['uri'])
+            for other in others:
+                if (other.id != self.id):
+                    other.write_message
+                    (
+                        {'vtype': msg['vtype'], 'uri': msg['uri']}
+                    )
+            votes = db(vote=msg['vtype'], uri=msg['uri'])
+            if (
+                msg['vtype'] == "downvote"
+                and
+                votes.len() >= (others.len() / 2)
+            ):
+                self.core.playback.next()
+                db.delete(votes)
             logger.info
             (
                 "Partify got valid vote ["+msg['vtype']+" "+msg['uri']+"]"
@@ -57,11 +72,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if others.count(self) > 0:
             others.remove(self)
         logger.info("Partify socket closed")
-
-    def update_others(self, vtype, uri):
-        for other in others:
-            if (other.id != self.id):
-                other.write_message({'vtype': vtype, 'uri': uri})
 
 
 def app_factory(config, core):
