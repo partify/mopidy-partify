@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -64,9 +64,9 @@ def app_factory(config, core):
                 'path': os.path.join
                 (
                     os.path.dirname(__file__), __static_path__
-                ),
-                'core': core
-            }
+                )
+            },
+            {'core': core}
         )
     ]
 
