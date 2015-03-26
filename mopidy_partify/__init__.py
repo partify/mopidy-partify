@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -77,10 +77,10 @@ class PartifyExtension(ext.Extension):
         return schema
 
     def setup(self, registry):
-        # registry.add('http:app', {
-        #     'name': self.ext_name,
-        #     'factory': app_factory,
-        # })
+        registry.add('http:app', {
+            'name': self.ext_name,
+            'factory': app_factory,
+        })
         registry.add('http:static', {
             'name': self.ext_name,
             'path': os.path.join(os.path.dirname(__file__), __static_path__),
