@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -30,13 +30,19 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         others.append(self)
 
         self.write_message("Hello World")
+        logger.info("Partify socket opened")
 
     def on_message(self, message):
         if (hasattr(message, 'vtype') and hasattr(message, 'uri')):
             db.insert(id=self.id, uri=message.uri, vote=message.vtype)
             self.write_message({'status': "OK"})
             self.updateOthers(self, message.vtype, message.uri)
+            logger.info
+            (
+                "Partify got valid vote ["+message.vtype+" "+message.uri+"]"
+            )
         else:
+            logger.info("Partify got invalid vote")
             self.write_message
             (
                 {
@@ -48,6 +54,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         if others.count(self) > 0:
             others.remove(self)
+        logger.info("Partify socket closed")
 
     def update_others(self, vtype, uri):
         for other in others:
