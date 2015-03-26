@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -56,18 +56,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 def app_factory(config, core):
     return [
-        #  (r'/ws', WSHandler),  # had this # {'core': core}),
-        (
-            r'/(.*)',
-            tornado.web.StaticFileHandler,
-            {
-                'path': os.path.join
-                (
-                    os.path.dirname(__file__), __static_path__
-                )
-            },
-            {'core': core}
-        )
+        (r'/ws', WSHandler)
     ]
 
 
@@ -91,4 +80,8 @@ class Extension(ext.Extension):
         registry.add('http:app', {
             'name': self.ext_name,
             'factory': app_factory,
+        })
+        registry.add('http:static', {
+            'name': self.ext_name,
+            'path': os.path.join(os.path.dirname(__file__), __static_path__),
         })
