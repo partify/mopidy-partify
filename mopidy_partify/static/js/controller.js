@@ -12,7 +12,8 @@ function queryCurrent() {
 
     // map in the current playing info
     $(".current.track-name").text(e.name);
-    $(".current .like").attr("data-uri", e.uri);
+    $(".current.like").attr("data-uri", e.uri);
+    $(".current.skip").attr("data-uri", e.uri);
     $(".current.artist-name").text(e.artists[0].name);
     $(".current.track-length").text(e.length);
 
@@ -72,7 +73,8 @@ function event_trackPlaybackStarted(tl_trackWrapper) {
   var trackLength = track.length;
 
   $(".current.track-name").text(track.name);
-  $(".current .like").attr("data-uri", track.uri);
+  $(".current.like").attr("data-uri", track.uri);
+  $(".current.skip").attr("data-uri", track.uri);
   $(".current.artist-name").text(track.artists[0].name);
 
   // clear any stale progress interval
