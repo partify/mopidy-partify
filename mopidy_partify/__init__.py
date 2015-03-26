@@ -6,7 +6,7 @@ import os
 
 import uuid
 
-from mopidy import config, core, ext
+from mopidy import config, ext
 
 import pydblite as pydb
 
@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.14'
+__version__ = '0.0.15'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -26,9 +26,11 @@ others = []
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
+    def initialize(self, core):
+        self.core = core
+
     def open(self):
         self.id = uuid.uuid4()
-        self.core = core
         others.append(self)
 
         self.write_message("Hello World")
@@ -73,12 +75,13 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if others.count(self) > 0:
             others.remove(self)
         db.delete(db(id=self.id))
+        self.id = None
         logger.info("Partify socket closed")
 
 
 def app_factory(config, core):
     return [
-        (r'/ws', WSHandler)
+        (r'/ws', WSHandler, {'core': core})
     ]
 
 
