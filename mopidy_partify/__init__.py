@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.12'
+__version__ = '0.0.13'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -71,6 +71,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         if others.count(self) > 0:
             others.remove(self)
+        db.delete(db(id=self.id))
         logger.info("Partify socket closed")
 
 
