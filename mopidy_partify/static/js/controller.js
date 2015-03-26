@@ -134,9 +134,9 @@ function event_tracklistChanged() {
 $(document).ready(function() {
 
   var mopidy = new Mopidy({
-      webSocketUrl: "ws://"+document.location.host+":6680/mopidy/ws/"
+      webSocketUrl: "ws://"+document.location.host+"/mopidy/ws/"
   }),
-    votes = new WebSocket("ws://"+document.location.host+":6680/partify/ws/"),
+    votes = new WebSocket("ws://"+document.location.host+"/partify/ws"),
     cbs = [];
 
   votes.onmessage = function(evt) {
