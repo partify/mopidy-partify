@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import json
 import logging
 import os
 
@@ -13,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.10'
+__version__ = '0.0.11'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -33,16 +34,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         logger.info("Partify socket opened")
 
     def on_message(self, message):
-        if (hasattr(message, 'vtype') and hasattr(message, 'uri')):
-            db.insert(id=self.id, uri=message.uri, vote=message.vtype)
+        msg = json.loads(message)
+        if (msg.has_key('vtype') and msg.has_key('uri')):
+            db.insert(id=self.id, uri=msg['uri'], vote=msg['vtype'])
             self.write_message({'status': "OK"})
-            self.updateOthers(self, message.vtype, message.uri)
+            self.updateOthers(self, msg['vtype'], msg['uri'])
             logger.info
             (
-                "Partify got valid vote ["+message.vtype+" "+message.uri+"]"
+                "Partify got valid vote ["+msg['vtype']+" "+msg['uri']+"]"
             )
         else:
-            logger.info("Partify got invalid vote ["+message+"]")
+            logger.info("Partify got invalid vote ["+msg+"]")
             self.write_message
             (
                 {
