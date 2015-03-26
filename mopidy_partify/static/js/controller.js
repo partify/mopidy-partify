@@ -12,6 +12,7 @@ function queryCurrent() {
 
     // map in the current playing info
     $(".current.track-name").text(e.name);
+    $(".current .like").attr("data-uri", e.uri);
     $(".current.artist-name").text(e.artists[0].name);
     $(".current.track-length").text(e.length);
 
@@ -41,6 +42,8 @@ function queryTracklist() {
       try{
         var item = $(".tracklist .item.hidden").clone().hide().removeClass("hidden").appendTo(".tracklist");
         item.find(".track-name").text(tracks[i].track.name);
+        item.find(".like").attr("data-uri", tracks[i].track.uri);
+        item.find(".skip").attr("data-uri", tracks[i].track.uri);
         item.find(".artist-name").text(tracks[i].track.artists[0].name);
         item.fadeIn("slow");
       } catch(e){console.error(e);}
@@ -69,6 +72,7 @@ function event_trackPlaybackStarted(tl_trackWrapper) {
   var trackLength = track.length;
 
   $(".current.track-name").text(track.name);
+  $(".current .like").attr("data-uri", track.uri);
   $(".current.artist-name").text(track.artists[0].name);
 
   // clear any stale progress interval
@@ -130,8 +134,18 @@ function event_tracklistChanged() {
 $(document).ready(function() {
 
   var mopidy = new Mopidy({
-      webSocketUrl: "ws://192.168.1.101:6680/mopidy/ws/"
-  });
+      webSocketUrl: "ws://"+document.location.host+":6680/mopidy/ws/"
+  }),
+    votes = new WebSocket("ws://"+document.location.host+":6680/partify/ws/"),
+    cbs = [];
+
+  votes.onmessage = function(evt) {
+    for (var i = 0 ; i < cbs.length; i++)
+      cbs[i](evt);
+  };
+
+  votes.onerror = console.error.bind(console);
+  cbs.push(console.log.bind(console));
 
   mopidy.on(console.log.bind(console)); //4dbg
 
@@ -231,6 +245,16 @@ $(document).ready(function() {
           // }
         }
       });
+    });
+
+    $(".like").click(function() {
+      var uri = $(this).attr("data-uri");
+      votes.send(JSON.stringify({vtype:"upvote", uri: uri}));
+    });
+
+    $(".skip").click(function() {
+      var uri = $(this).attr("data-uri");
+      votes.send(JSON.stringify({vtype:"downvote", uri: uri}));
     });
   });
 });
