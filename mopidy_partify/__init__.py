@@ -14,7 +14,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.13'
+__version__ = '0.0.14'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -37,6 +37,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         msg = json.loads(message)
         if ('vtype' in msg and 'uri' in msg):
+            logger.info
+            (
+                "Partify got valid vote ["+msg['vtype']+" "+msg['uri']+"]"
+            )
             db.insert(id=self.id, uri=msg['uri'], vote=msg['vtype'])
             db.commit()
             self.write_message({'status': "OK"})
@@ -50,14 +54,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             if (
                 msg['vtype'] == "downvote"
                 and
-                votes.len() >= (others.len() / 2)
+                len(votes) >= (len(others) / 2)
             ):
                 self.core.playback.next()
                 db.delete(votes)
-            logger.info
-            (
-                "Partify got valid vote ["+msg['vtype']+" "+msg['uri']+"]"
-            )
+            logger.info("Partify processed vote")
         else:
             logger.info("Partify got invalid vote ["+msg+"]")
             self.write_message
