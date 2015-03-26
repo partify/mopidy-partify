@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -56,11 +56,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 def app_factory(config, core):
     return [
-        (r'/ws', WSHandler),  # had this # {'core': core}),
+        #  (r'/ws', WSHandler),  # had this # {'core': core}),
         (
             r'/(.*)',
             tornado.web.StaticFileHandler,
-            {'path': os.path.join(os.path.dirname(__file__), __static_path__)}
+            {
+                'path': os.path.join
+                (
+                    os.path.dirname(__file__), __static_path__
+                ),
+                'core': core
+            }
         )
     ]
 
