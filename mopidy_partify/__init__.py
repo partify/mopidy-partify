@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -42,7 +42,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 "Partify got valid vote ["+message.vtype+" "+message.uri+"]"
             )
         else:
-            logger.info("Partify got invalid vote")
+            logger.info("Partify got invalid vote ["+message+"]")
             self.write_message
             (
                 {
@@ -58,7 +58,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def update_others(self, vtype, uri):
         for other in others:
-            if (other != self):
+            if (other.id != self.id):
                 other.write_message({'vtype': vtype, 'uri': uri})
 
 
