@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -27,7 +27,7 @@ others = []
 class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.id = uuid.uuid4()
-        others.insert(self)
+        others.append(self)
 
         self.write_message("Hello World")
 
@@ -46,7 +46,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             )
 
     def on_close(self):
-        others.remove(self)
+        if others.count(self) > 0:
+            others.remove(self)
 
     def update_others(self, vtype, uri):
         for other in others:
