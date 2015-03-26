@@ -13,13 +13,13 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.0.9'
+__version__ = '0.0.10'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
 # TODO: If you need to log, use loggers named after the current Python module
 logger = logging.getLogger(__name__)
-db = pydb.Base(os.path.join(os.path.dirname(__file__), "votes.pdl"))
+db = pydb.Base("votes.pdl", save_to_file=False)
 db.create("id", "uri", "vote", mode="override")
 others = []
 
