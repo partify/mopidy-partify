@@ -209,12 +209,16 @@ $(document).ready(function() {
             item.fadeIn("slow");
 
             item.find(".btn.add").attr("data-uri", backends[i].tracks[j].uri).bind("click", function() {
+              var $btn = $(this);
               mopidy.library.lookup($(this).attr("data-uri")).done(function(tracks) {
 
                 // take the first one
                 var trk = tracks[0];
                 mopidy.tracklist.add([trk]).done(function() {
-                  $(this).fadeOut("slow");
+                  $btn.fadeOut("slow");
+                  mopidy.playback.getState().done(function(s) {
+                    if (s != "playing") mopidy.playback.play();
+                  });
                 });
               });
             });
