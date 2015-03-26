@@ -60,7 +60,7 @@ def app_factory(config, core):
     ]
 
 
-class Extension(ext.Extension):
+class PartifyExtension(ext.Extension):
     dist_name = 'Mopidy-Partify'
     ext_name = 'partify'
     version = __version__
@@ -70,17 +70,17 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = super(Extension, self).get_config_schema()
+        schema = super(PartifyExtension, self).get_config_schema()
         schema['service'] = config.Hostname()
         schema['room'] = config.String()
         schema['protected'] = config.Boolean()
         return schema
 
     def setup(self, registry):
-        registry.add('http:app', {
-            'name': self.ext_name,
-            'factory': app_factory,
-        })
+        # registry.add('http:app', {
+        #     'name': self.ext_name,
+        #     'factory': app_factory,
+        # })
         registry.add('http:static', {
             'name': self.ext_name,
             'path': os.path.join(os.path.dirname(__file__), __static_path__),

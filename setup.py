@@ -32,7 +32,7 @@ setup(
     ],
     entry_points={
         'mopidy.ext': [
-            'partify = mopidy_partify:Extension',
+            'partify = mopidy_partify:PartifyExtension',
         ],
     },
     classifiers=[
