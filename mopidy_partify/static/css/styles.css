@@ -1,0 +1,29 @@
+.flat-bottom {
+  border-bottom-left-radius:0px !important; 
+  border-bottom-right-radius:0px !important;
+}
+.flat-top {
+  border-top-left-radius:0px !important; 
+  border-top-right-radius:0px !important;
+}
+.track-name {
+  color:#222222;
+}
+.artist-name {
+  font-size: 16px;
+  color:#666666;
+}
+.item {
+  text-align: left;
+}
+.text-muted {
+  color: #999999;
+  font-size:42px;
+  font-family: 'Damion', cursive;
+}
+.close {
+  width:32px;
+  height:32px;
+  margin-left:8px;
+  background-image: url("../img/arrow_32.png") !important;
+}
