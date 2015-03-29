@@ -197,23 +197,14 @@ $(document).ready(function() {
     });
 
     $(".queue-ui .queue-search").keydown(function(e) {
-      typeAheadTimeout = new Date().getTime()+500;
+      typeAheadTimeout = new Date().getTime()+300;
       var thing = this;
       setTimeout(function() {
         if(new Date().getTime() < typeAheadTimeout) {
-          console.log("nah dont");
         } else {
-          console.log("okay yeah do it");
-          console.log(e);
           search(e, thing);
         }
-      }, 500);
-      
-      //TODO do timeout and sanatization and null checks
-
-      //TODO don't do this every time
-      
-      
+      }, 300);
       
     });
 
@@ -230,7 +221,7 @@ $(document).ready(function() {
 });
 
 function search(e, thing) {
-  if(e.which==8 && $(this).val().length<=1) {
+  if(e.which==8 && $(thing).val().length<=1) {
     $(".queue-results").find(".item:not(.hidden)").remove();
   }
   
@@ -250,7 +241,6 @@ function search(e, thing) {
   if(term.length==0) {
     return;
   }
-  console.log(term);
   
   mopidy.library.search({'any': [term]}).done(function(backends) {
     $(".queue-results").find(".item:not(.hidden)").remove();
@@ -262,22 +252,27 @@ function search(e, thing) {
       // iterate tracks
       if (backends[i].tracks) {
         for (var j = 0; j < backends[i].tracks.length ; j++) {
-          if(backends[i].uri.substring(1+backends[i].uri.lastIndexOf(':')) != term) {
-            continue;
-          }
           var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
+          if (j == 0) {
+            item.addClass("top-item");
+          }
+          if (j == 8) {
+            item.addClass("bottom-item");
+          }
           item.find(".track-name").text(backends[i].tracks[j].name);
           item.find(".artist-name").text(backends[i].tracks[j].artists[0].name);
           item.fadeIn("slow");
 
-          item.find(".btn.add").attr("data-uri", backends[i].tracks[j].uri).bind("click", function() {
+          item.attr("data-uri", backends[i].tracks[j].uri).bind("click", function() {
             var $btn = $(this);
+            $btn.animate({height: 0, opacity: 0});
+            $btn.css('margin-bottom', '0px').css('margin-top', '0px').
+              css('padding-bottom', '0px').css('padding-top', '0px');
             mopidy.library.lookup($(this).attr("data-uri")).done(function(tracks) {
 
               // take the first one
               var trk = tracks[0];
-              mopidy.tracklist.add([trk]).done(function() {
-                $btn.fadeOut("slow");
+              mopidy.tracklist.add([trk]).done(function() {  
                 mopidy.playback.getState().done(function(s) {
                   if (s != "playing") mopidy.playback.play();
                 });
@@ -286,7 +281,7 @@ function search(e, thing) {
           });
 
           total++;
-          if (j > 5 || total > 20) break;
+          if (j > 7 || total > 20) break;
         }
       }
 
