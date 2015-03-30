@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import httplib
 import json
 import logging
 import os
@@ -14,7 +15,7 @@ import tornado.web
 import tornado.websocket
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -31,10 +32,33 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         self.id = uuid.uuid4()
+
+        conn = httplib.HTTPConnection("usernames.io")
+        conn.request("GET", "/")
+        res = conn.getresponse()
+        data = res.read()
+        msg = json.loads(data)
+
+        self.username = msg.username
+
+        self.write_message({'id': self.id, 'username': self.username})
+
+        for other in others:
+                if (other.id != self.id):
+                    other.write_message
+                    (
+                        {
+                            'status': "ONLINE",
+                            'user': self.username
+                        }
+                    )
+
         others.append(self)
 
-        self.write_message("Hello World")
-        logger.info("Partify socket opened")
+        logger.info
+        (
+            "Partify socket["+self.id+"] opened for u["+self.username+"]"
+        )
 
     def on_message(self, message):
         msg = json.loads(message)
@@ -50,7 +74,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 if (other.id != self.id):
                     other.write_message
                     (
-                        {'vtype': msg['vtype'], 'uri': msg['uri']}
+                        {
+                            'vtype': msg['vtype'],
+                            'uri': msg['uri'],
+                            'user': self.username
+                        }
                     )
             votes = db(vote=msg['vtype'], uri=msg['uri'])
             if (
@@ -76,6 +104,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if others.count(self) > 0:
             others.remove(self)
         db.delete(db(id=self.id))
+
+        for other in others:
+                if (other.id != self.id):
+                    other.write_message
+                    (
+                        {
+                            'status': "OFFLINE",
+                            'user': self.username
+                        }
+                    )
+
         self.id = None
         logger.info("Partify socket closed")
 
