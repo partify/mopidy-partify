@@ -272,9 +272,12 @@ function search(e, thing) {
 
               // take the first one
               var trk = tracks[0];
-              mopidy.tracklist.add([trk]).done(function() {  
+
+              // at the track, at index 0
+              mopidy.tracklist.add([trk], 0).done(function(t) {
                 mopidy.playback.getState().done(function(s) {
-                  if (s != "playing") mopidy.playback.play();
+                  // DFD: then, start playing the track 
+                  /*if (s != "playing")*/ mopidy.playback.play(t[0]);
                 });
               });
             });
