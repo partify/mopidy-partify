@@ -4,17 +4,37 @@ body {
 .main-content {
   background-color: #666666;
 }
-.track-name {
-  color: #eeeeee !important;
-}
 .text-muted {
-  color: #30D4F2 !important;
+  color: #eeeeee !important;
   font-size:42px;
   font-family: 'Damion', cursive;
 }
-.artist-name {
-  color:#eeeeee;
+.current.track-name {
+  color: #ffffff !important;
+}
+.current.artist-name {
+  color:#ffffff !important;
 }
 p {
   color: #dddddd;
+}
+.track-name {
+  font-size: 16px;
+  font-family: "montserrat";
+  color:#222222;
+}
+.artist-name {
+  font-size: 16px;
+  font-family: "lato";
+  color:#444444;
+}
+.track-info.track-name {
+  font-size: 20px;
+  font-family: "montserrat";
+  color:#eeeeee;
+}
+.track-info.artist-name {
+  font-size: 18px;
+  font-family: "lato";
+  color:#cccccc;
 }
