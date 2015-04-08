@@ -27,14 +27,6 @@
   margin-left:8px;
   background-image: url("../img/arrow_32.png") !important;
 }
-.bottom-item {
-  border-bottom-left-radius:4px !important; 
-  border-bottom-right-radius:4px !important;
-}
-.top-item {
-  border-top-left-radius:4px !important; 
-  border-top-right-radius:4px !important;
-}
 .track-info {
   line-height: 125%;
 }

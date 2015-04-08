@@ -37,7 +37,7 @@ function queryTracklist() {
   $(".tracklist").find(".item:not(.hidden)").remove();
 
   // get all the tracks and render them
-  this.tracklist.getTlTracks().done(function(tracks) {
+  mopidy.tracklist.getTlTracks().done(function(tracks) {
 
     tracks.splice(0, 1);
 
@@ -142,11 +142,9 @@ var typeAheadTimeout = 0;
 $(document).ready(function() {
 
   var mopidy = new Mopidy({
-      //webSocketUrl: "ws://10.34.26.39:6680/mopidy/ws/"
-      webSocketUrl: "ws://192.168.1.89:6680/mopidy/ws/"
+      webSocketUrl: "ws://localhost:6680/mopidy/ws/"
   }),
-    //votes = new WebSocket("ws://10.34.26.39:6680/partify/ws"),
-    votes = new WebSocket("ws://192.168.1.89:6680/partify/ws"),
+    votes = new WebSocket("ws://localhost:6680/partify/ws"),
     cbs = [];
 
   votes.onmessage = function(evt) {
@@ -255,13 +253,7 @@ function search(e, thing) {
       if (backends[i].tracks) {
         for (var j = 0; j < backends[i].tracks.length ; j++) {
           var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
-          if (j == 0) {
-            //item.addClass("top-item");
-          }
-          if (j == 8) {
-            //item.addClass("bottom-item");
-          }
-          console.log(backends[i].tracks[j]);
+          
           item.find(".track-name").text(backends[i].tracks[j].name);
           item.find(".artist-name").text(backends[i].tracks[j].artists[0].name);
           item.fadeIn("slow");
