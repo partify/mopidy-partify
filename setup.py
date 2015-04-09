@@ -28,7 +28,8 @@ setup(
         'Mopidy >= 0.18',
         'Pykka >= 1.1',
         'pydblite >= 3.0',
-        'uuid >= 1.3'
+        'uuid >= 1.3',
+        'websocket-client >= 0.29'
     ],
     entry_points={
         'mopidy.ext': [
