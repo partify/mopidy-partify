@@ -16,7 +16,7 @@ import tornado.websocket
 
 import websocket
 
-__version__ = '0.1.1'
+__version__ = '0.2.1'
 __static_path__ = 'static'
 __config_path__ = 'ext.conf'
 
@@ -92,7 +92,6 @@ class PartifyExtension(ext.Extension):
     dist_name = 'Mopidy-Partify'
     ext_name = 'partify'
     version = __version__
-    ws = None
 
     def get_default_config(self):
         conf_file = os.path.join(os.path.dirname(__file__), __config_path__)
@@ -117,10 +116,10 @@ class PartifyExtension(ext.Extension):
         logger.info("Registered partify as http:static")
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("api.partify.com", 80))  # could use 8.8.8.8 to be faster
+        s.connect(("partify.fm", 80))  # could use 8.8.8.8 to be faster
         ip = s.getsockname()[0]
         s.close()
 
-        ws = websocket.WebSocket()
-        ws.connect("ws://api.partify.fm")
+        ws = websocket.WebSocketApp("ws://partify.fm")
+        ws.run_forever()
         ws.send(json.dumps("{ip:"+ip+"}"))
