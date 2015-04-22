@@ -29,7 +29,7 @@ setup(
         'Pykka >= 1.1',
         'pydblite >= 3.0',
         'uuid >= 1.3',
-        'websocket-client >= 0.29'
+        'ws4py >= 0.3.4'
     ],
     entry_points={
         'mopidy.ext': [
