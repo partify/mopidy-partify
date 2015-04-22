@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def app_factory(config, core):
     return [
-        (r'/voting', VotingHandler, {'core': core})
+        (r'/voting', VotingHandler.Handler, {'core': core})
     ]
 
 
@@ -50,6 +50,8 @@ class PartifyExtension(ext.Extension):
         })
         logger.info("Registered partify as http:static")
 
-        ws = ChannelWSProvider('ws://partify.fm')
-        ws.connect()
-        ws.run_forever()
+        ws = ChannelWSProvider.Provider('ws://localhost:1337', __version__)
+        try:
+            ws.connect_and_start()
+        except:
+            logger.info("[PARTIFY][WS] Failed connection")

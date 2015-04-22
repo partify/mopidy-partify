@@ -18,7 +18,7 @@ db.create("id", "uri", "vote", mode="override")
 others = []
 
 
-class Handler(tornado.websocket.WebSocketHandler):
+class WSHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, core):
         self.core = core
 

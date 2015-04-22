@@ -5,21 +5,20 @@ import json
 import logging
 import re
 import socket
+import thread
 
-from ws4py.client.threadedclient import WebSocketClient
+from ws4py.client.tornadoclient import TornadoWebSocketClient
+from tornado import ioloop
 
 # TODO: If you need to log, use loggers named after the current Python module
 logger = logging.getLogger(__name__)
 
 
-# Since i'm a python noob let's just copy this here for now
-def get_version(filename):
-    content = open(filename).read()
-    metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", content))
-    return metadata['version']
+class Provider(TornadoWebSocketClient):
+    def __init__(self, uri, version, *kwargs):
+        TornadoWebSocketClient.__init__(self, uri, kwargs)
+        self.version = version
 
-
-class ChannelWSProvider(WebSocketClient):
     def opened(self):
         # get public facing device ip
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -30,17 +29,24 @@ class ChannelWSProvider(WebSocketClient):
         # send ip to service
         self.send
         (
-            json.dumps
-            (
-                {"ip": ip, "version": get_version('__init__.py')}
-            )
+            "penis"
         )
 
         # log that we've done that
         logger.info("[ChannelWSProvider][OPEN] registered")
 
     def closed(self, code, reason=None):
-        logger.info("[ChannelWSProvider][CLOSE] " + code + reason)
+        logger.info
+        (
+            "[ChannelWSProvider][CLOSE] " + str(code) + " " + str(reason)
+        )
+        ioloop.IOLoop.instance().stop()
 
     def received_message(self, m):
-        logger.info("[ChannelWSProvider][MSG] " + m)
+        logger.info("[ChannelWSProvider][MSG] " + str(m))
+
+    def connect_and_start(self):
+        def run(*kwargs):
+            self.connect()
+            ioloop.IOLoop.instance().start()
+        thread.start_new_thread(run, ())
