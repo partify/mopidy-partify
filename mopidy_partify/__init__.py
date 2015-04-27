@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 import logging
 import os
 
-import ChannelWSProvider
-
 import VotingHandler
 
 from mopidy import config, ext
@@ -49,9 +47,3 @@ class PartifyExtension(ext.Extension):
             'path': os.path.join(os.path.dirname(__file__), __static_path__),
         })
         logger.info("Registered partify as http:static")
-
-        ws = ChannelWSProvider.Provider('ws://localhost:1337', __version__)
-        try:
-            ws.connect_and_start()
-        except:
-            logger.info("[PARTIFY][WS] Failed connection")
