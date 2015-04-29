@@ -4,11 +4,6 @@ body {
 .main-content {
   background-color: #666666;
 }
-.text-muted {
-  color: #eeeeee !important;
-  font-size:42px;
-  font-family: 'Damion', cursive;
-}
 .current.track-name {
   color: #ffffff !important;
 }

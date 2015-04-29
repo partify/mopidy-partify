@@ -94,6 +94,17 @@ function event_trackPlaybackStarted(tl_trackWrapper) {
 
   // set the timeout for updating
   newProgressTimeout(trackLength);
+  
+  // remove the song from the queue if it exists
+  $(".tracklist").children().not('.hidden').each(function () {
+    if($(this).children().eq(1).children().eq(1).children().eq(1).text()==track.name &&
+    $(this).children().eq(1).children().eq(1).children().eq(2).text()==track.artists[0].name) {
+      //$(this).remove();
+      //mopidy.tracklist.remove(tl_trackWrapper.tl_track)
+      return false;
+    }
+  });
+
 }
 
 function event_trackPlaybackEnded(tl_trackWrapperWithTimePosition) {
@@ -105,7 +116,7 @@ function event_trackPlaybackEnded(tl_trackWrapperWithTimePosition) {
   }
 
   $(".current.progress-bar").css("width", 0+"%");
-  progressBarValue = 0;
+  progressBarValue = 0;  
 }
 
 function event_trackPlaybackPaused(tl_trackWrapperWithTimePosition) {
@@ -136,15 +147,17 @@ function event_tracklistChanged() {
   //this is the instance of mopidy
 
   // we proxy this event to just call the tracklist querier
+  console.log("tracklist changed");
+  $(".tracklist").find(".item:not(.hidden)").remove();
   queryTracklist.call(this);
 }
 var typeAheadTimeout = 0;
 $(document).ready(function() {
 
   var mopidy = new Mopidy({
-      webSocketUrl: "ws://localhost:6680/mopidy/ws/"
+      webSocketUrl: "ws://192.168.1.89:6680/mopidy/ws/"
   }),
-    votes = new WebSocket("ws://localhost:6680/partify/ws"),
+    votes = new WebSocket("ws://192.168.1.89:6680/partify/ws"),
     cbs = [];
 
   votes.onmessage = function(evt) {
@@ -183,17 +196,11 @@ $(document).ready(function() {
 
     // bind buttons
     $(".current.queue").click(function() {
-      $(".jumbotron .playing-ui").slideUp(400);
-      $(".jumbotron .queue-ui").hide().removeClass("hidden").slideToggle(400);
-      $(".jumbotron").removeClass("flat-bottom");
-      $(".queue").animate({opacity:0}).addClass("disabled");
+      showSearch();
     });
 
     $(".queue-ui .close").click(function() {
-      $(".jumbotron .playing-ui").slideDown(400);
-      $(".jumbotron .queue-ui").slideToggle(400).show();
-      $(".jumbotron").addClass("flat-bottom");
-      $(".queue").animate({opacity:1}).removeClass("disabled");
+      hideSearch();
     });
 
     $(".queue-ui .queue-search").keydown(function(e) {
@@ -233,12 +240,26 @@ function search(e, thing) {
   } else {
     char = "";
   }
-  var term = $(thing).val();//+char;
+  var term = $(thing).val();
   if(e.which==8) {
     term = term.substring(0, term.length);
   }
   
   if(term.length==0) {
+    return;
+  }
+  
+  if(term=="bored elon") {
+    var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
+    item.css({"background-color":"#ff0000;"});
+    item.find(".track-name").text("Select this to enable developer tools");
+    item.find(".artist-name").text("punk");
+    item.fadeIn("slow");
+    item.bind("click", function() {
+      
+      hideSearch();
+      setTimeout(function() {$(".queue-results").find(".item:not(.hidden)").remove();}, 500);
+    });
     return;
   }
   
@@ -253,12 +274,14 @@ function search(e, thing) {
       if (backends[i].tracks) {
         for (var j = 0; j < backends[i].tracks.length ; j++) {
           var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
-          
+          //console.log(backends[i].tracks[j]);
+          getAlbumArt(backends[i].tracks[j].uri);
           item.find(".track-name").text(backends[i].tracks[j].name);
           item.find(".artist-name").text(backends[i].tracks[j].artists[0].name);
           item.fadeIn("slow");
 
           item.attr("data-uri", backends[i].tracks[j].uri).bind("click", function() {
+            console.log("clicked");
             var $btn = $(this);
             $btn.animate({height: 0, opacity: 0});
             $btn.css('margin-bottom', '0px').css('margin-top', '0px').
@@ -268,11 +291,17 @@ function search(e, thing) {
               // take the first one
               var trk = tracks[0];
 
-              // at the track, at index 0
-              mopidy.tracklist.add([trk], 0).done(function(t) {
+              //if(!mopidy.tracklist.getConsume()) {
+              mopidy.tracklist.setConsume(true);
+              //}
+              mopidy.tracklist.add([trk]).done(function(t) {
+                console.log("added song");
                 mopidy.playback.getState().done(function(s) {
                   // DFD: then, start playing the track 
-                  /*if (s != "playing")*/ mopidy.playback.play(t[0]);
+                    if (s != "playing") mopidy.playback.play(t[0]);
+                    $(".queue-ui .queue-search").val("");
+                    hideSearch();
+                    setTimeout(function() {$(".queue-results").find(".item:not(.hidden)").remove();}, 500);
                 });
               });
             });
@@ -309,6 +338,22 @@ function search(e, thing) {
   });
 }
 
-// function getAlbumArt(uri, container) {
-//   mopidy.library.
-// }
+function getAlbumArt(uri, container) {
+  mopidy.library.getImages(uri).done(function(backends) {
+    console.log(backends);
+  });
+}
+
+function showSearch() {
+  $(".jumbotron .playing-ui").slideUp(400);
+  $(".jumbotron .queue-ui").hide().removeClass("hidden").slideToggle(400);
+  $(".jumbotron").removeClass("flat-bottom");
+  $(".queue").animate({opacity:0}).addClass("disabled");
+}
+
+function hideSearch() {
+  $(".jumbotron .playing-ui").slideDown(400);
+  $(".jumbotron .queue-ui").slideToggle(400).show();
+  $(".jumbotron").addClass("flat-bottom");
+  $(".queue").animate({opacity:1}).removeClass("disabled");
+}

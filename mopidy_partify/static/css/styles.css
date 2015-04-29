@@ -12,14 +12,15 @@
 .item {
   text-align: left;
 }
-.text-muted {
+.header-cp {
   width:100%;
-  line-height:125%;
-  margin-bottom:0px;
+  height: 50px;
+  line-height:100%;
   color: #eeeeee;
   background-color: #0099cc;
   font-size:42px;
-  font-family: 'Damion', cursive;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
 }
 .close {
   width:32px;
