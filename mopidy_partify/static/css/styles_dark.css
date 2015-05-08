@@ -17,11 +17,17 @@ p {
   font-size: 16px;
   font-family: "montserrat";
   color:#222222;
+  line-height:150%;
 }
 .artist-name {
   font-size: 16px;
   font-family: "lato";
   color:#444444;
+  line-height:150%;
+}
+.album-art {
+  width: 48px;
+  height: 48px;
 }
 .track-info.track-name {
   font-size: 20px;

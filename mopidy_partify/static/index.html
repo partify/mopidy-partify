@@ -77,11 +77,16 @@
           </div>
           <div class="queue-results" style="margin-top: 8px;">
             <div class="item hidden"  style="cursor: pointer; padding:4px;margin-top:2px;margin-bottom:2px;background-color:#f8f8f8;">
-              <span class="track-name">
-                Track Name
+              <span style="margin-right:8px; float: left;"> 
+                <img src = "" class="album-art"></img>
               </span>
-              <span class="artist-name">
-                Artist Name
+              <span style="margin-bottom:8px;">
+                <div class="track-name">
+                  Track Name
+                </div>
+                <div class="artist-name">
+                  Artist Name
+                </div>
               </span>
               <span class="hidden" style="float:right;">
                 <a class="btn btn-sm btn-success add" style="padding-top:4px; padding-bottom:4px;" href="#fakelink" role="button">Add</a>
@@ -106,9 +111,7 @@
                   <button class="track-action skip" role="button">Dislike</button>
                 </span>
                 <span>
-                  <div class="track-info track-album"> 
-                    <i></i>
-                  </div>
+                  
                   <div class="track-info track-name">
                     Track Name
                   </div>
@@ -137,7 +140,7 @@
     <script src="js/fakelink.js"></script>
 
     <script src="js/controller.js"></script>
-    <script src="http://192.168.1.89:6680/mopidy/mopidy.min.js"></script>
+    <script src="/mopidy/mopidy.min.js"></script>
 
   </body>
 </html>
