@@ -1,7 +1,7 @@
 var progressBarInterval = null,
     progressBarValue = 0;
     
-var maxSearchItems = 20;
+var maxSearchItems = 6;
 
 function queryCurrent() {
   //this is the instance of mopidy
@@ -275,6 +275,9 @@ function search(e, thing) {
             $btn.animate({height: 0, opacity: 0});
             $btn.css('margin-bottom', '0px').css('margin-top', '0px').
               css('padding-bottom', '0px').css('padding-top', '0px');
+              
+            hideSearch();
+              
             mopidy.library.lookup($(this).attr("data-uri")).done(function(tracks) {
 
               // take the first one
@@ -289,7 +292,7 @@ function search(e, thing) {
                   }
                   
                   $(".queue-ui .queue-search").val("");
-                  hideSearch();
+                  
                   setTimeout(function() {
                     $(".queue-results").find(".item:not(.hidden)").remove();
                   }, 500);
