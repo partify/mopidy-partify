@@ -1,7 +1,9 @@
 var progressBarInterval = null,
     progressBarValue = 0;
     
-var maxSearchItems = 6;
+var maxSearchItems = 8;
+
+var votes;
 
 function queryCurrent() {
   //this is the instance of mopidy
@@ -52,7 +54,7 @@ function queryTracklist() {
         item.find(".skip").attr("data-uri", tracks[i].track.uri);
         item.find(".artist-name").text(tracks[i].track.artists[0].name);
         item.fadeIn("slow");
-      } catch(e){console.error(e);}
+      } catch(e) { console.error(e); }
     }
   });
 }
@@ -147,8 +149,10 @@ $(document).ready(function() {
   var mopidy = new Mopidy({
       webSocketUrl: "ws://"+document.location.host+"/mopidy/ws/"
   }),
-    votes = new WebSocket("ws://"+document.location.host+"/partify/ws"),
     cbs = [];
+  
+  votes = new WebSocket("ws://"+document.location.host+"/partify/ws"),
+    
 
   votes.onmessage = function(evt) {
     for (var i = 0 ; i < cbs.length; i++)
@@ -263,6 +267,7 @@ function search(e, thing) {
       // iterate tracks
       if (backends[i].tracks) {
         for (var j = 0; j < backends[i].tracks.length ; j++) {
+          if (j >= maxSearchItems) break;
           var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
           
           item.find(".track-name").text(backends[i].tracks[j].name);
@@ -270,41 +275,70 @@ function search(e, thing) {
           getAlbumArt(backends[i].tracks[j].album.uri, item.find(".album-art"));
           item.fadeIn("slow");
 
-          item.attr("data-uri", backends[i].tracks[j].uri).bind("click", function() {
-            var $btn = $(this);
-            $btn.animate({height: 0, opacity: 0});
-            $btn.css('margin-bottom', '0px').css('margin-top', '0px').
-              css('padding-bottom', '0px').css('padding-top', '0px');
-              
-            hideSearch();
-              
-            mopidy.library.lookup($(this).attr("data-uri")).done(function(tracks) {
-
-              // take the first one
-              var trk = tracks[0];
-
-              mopidy.tracklist.setConsume(true);
-              
-              mopidy.tracklist.add([trk]).done(function(t) {
-                mopidy.playback.getState().done(function(s) {
-                  if (s != "playing") {
-                    mopidy.playback.play(t[0]);
-                  }
-                  
-                  $(".queue-ui .queue-search").val("");
-                  
-                  setTimeout(function() {
-                    $(".queue-results").find(".item:not(.hidden)").remove();
-                  }, 500);
-                });
-              });
-            });
-          });
-
-          if (j > maxSearchItems) break;
+          // if the song is in the track list, enable the like button
+          //    also, dont add the on click listener
+          isRepeat(backends[i].tracks[j].uri, item);
+          
+          
         }
       }
     }
+  });
+}
+
+function isRepeat(uri, item) {
+  
+  mopidy.tracklist.getTracks().done(function (tracks) {    
+    
+    var repeat = false;
+    
+    for(var r = 0; r < tracks.length; r++) {
+      if (uri == tracks[r].uri) {
+        item.find(".like").toggleClass("hidden");
+        item.find(".like").bind("click", function() {
+          var uri = $(this).attr("data-uri");
+          votes.send(JSON.stringify({vtype:"upvote", uri: uri}));
+        });
+        repeat = true;
+        break;
+      }
+    }
+    
+    if (repeat == false) {
+      item.attr("data-uri", uri).bind("click", onSearchItemClick);
+    }
+  });
+}
+
+function onSearchItemClick() {
+  
+  var $btn = $(this);
+  $btn.animate({height: 0, opacity: 0});
+  $btn.css('margin-bottom', '0px').css('margin-top', '0px').
+    css('padding-bottom', '0px').css('padding-top', '0px');
+    
+  hideSearch();
+    
+  mopidy.library.lookup($(this).attr("data-uri")).done(function(tracks) {
+
+    // take the first one
+    var trk = tracks[0];
+
+    mopidy.tracklist.setConsume(true);
+    
+    mopidy.tracklist.add([trk]).done(function(t) {
+      mopidy.playback.getState().done(function(s) {
+        if (s != "playing") {
+          mopidy.playback.play(t[0]);
+        }
+        
+        $(".queue-ui .queue-search").val("");
+        
+        setTimeout(function() {
+          $(".queue-results").find(".item:not(.hidden)").remove();
+        }, 500);
+      });
+    });
   });
 }
 

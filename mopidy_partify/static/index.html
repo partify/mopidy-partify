@@ -47,6 +47,7 @@
   <body style="padding:0;">
     <div class="header-cp">CoPlay</div>
     <div class="container" style="padding:0;">
+      <!-- currently playing -->
       <div class="jumbotron flat-bottom main-content" style="margin-bottom:0px; border-width:0; border-radius:0px;">
         <div class="playing-ui">
           <div class="current track-name">Nothing Playing...</div>
@@ -67,6 +68,8 @@
           </p>
           
         </div>
+        
+        <!-- search -->
         <div class="queue-ui hidden">
           <button type="button" class="close"></button>
           <div class="input-group input-group-sm">
@@ -75,32 +78,39 @@
               <button class="btn" type="button"><span class="fui-search"></span></button>
             </span>
           </div>
+          <!-- search results queue -->
           <div class="queue-results" style="margin-top: 8px;">
             <div class="item hidden"  style="cursor: pointer; padding:4px;margin-top:2px;margin-bottom:2px;background-color:#f8f8f8;">
-              <span style="margin-right:8px; float: left;"> 
+              <div style="margin-right:8px; float: left;"> 
                 <img src = "" class="album-art"></img>
-              </span>
-              <span style="margin-bottom:8px;">
+              </div>
+              <div style="display:inline-block;">
                 <div class="track-name">
                   Track Name
                 </div>
                 <div class="artist-name">
                   Artist Name
                 </div>
-              </span>
-              <span class="hidden" style="float:right;">
-                <a class="btn btn-sm btn-success add" style="padding-top:4px; padding-bottom:4px;" href="#fakelink" role="button">Add</a>
-              </span>
+              </div>
+              <div class="" style="float: right;">
+                <button class="hidden track-action like" role="button" style="margin-top:8px;">Like</button>
+              </div>
+              
+              <!-- <span class="hidden" style="float:right;">
+                <a class="btn btn-sm btn-success like" style="padding-top:4px; padding-bottom:4px;" href="#fakelink" role="button">Like</a>
+              </span> -->
             </div>
           </div>
         </div>
       </div>
+      <!-- queue a song button -->
       <div class="hidden-xs hidden-sm" style="width:100%;">
         <a class="btn btn-lg btn-info current queue flat-top" style="background-color:#aaaaaa; width:100%; font-family:'montserrat', Arial; border-radius:0px;" role="button">Queue a song</a>
       </div>
       <div class="hidden-md hidden-lg" style="width:100%;">
         <a class="btn btn-lg btn-info current queue flat-top" style="background-color:#afaaaf; width:100%; font-family:'montserrat', Arial; border-radius:0px;" role="button">Queue a song</a>
       </div>
+      <!-- playlist -->
       <div class="row marketing" style="padding: 0px;">
         <div class="col-lg-12 tracklist" style="padding: 0px;">
           <div class="item hidden" style="margin-top:8px;">
