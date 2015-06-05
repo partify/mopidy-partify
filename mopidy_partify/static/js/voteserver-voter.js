@@ -1,4 +1,73 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Voter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+exports.defaults = {};
+
+exports.set = function(name, value, options) {
+  // Retrieve options and defaults
+  var opts = options || {};
+  var defaults = exports.defaults;
+
+  // Apply default value for unspecified options
+  var expires  = opts.expires || defaults.expires;
+  var domain   = opts.domain  || defaults.domain;
+  var path     = opts.path     != undefined ? opts.path     : (defaults.path != undefined ? defaults.path : '/');
+  var secure   = opts.secure   != undefined ? opts.secure   : defaults.secure;
+  var httponly = opts.httponly != undefined ? opts.httponly : defaults.httponly;
+
+  // Determine cookie expiration date
+  // If succesful the result will be a valid Date, otherwise it will be an invalid Date or false(ish)
+  var expDate = expires ? new Date(
+      // in case expires is an integer, it should specify the number of days till the cookie expires
+      typeof expires == 'number' ? new Date().getTime() + (expires * 864e5) :
+      // else expires should be either a Date object or in a format recognized by Date.parse()
+      expires
+  ) : '';
+
+  // Set cookie
+  document.cookie = name.replace(/[^+#$&^`|]/g, encodeURIComponent)                // Encode cookie name
+  .replace('(', '%28')
+  .replace(')', '%29') +
+  '=' + value.replace(/[^+#$&/:<-\[\]-}]/g, encodeURIComponent) +                  // Encode cookie value (RFC6265)
+  (expDate && expDate.getTime() >= 0 ? ';expires=' + expDate.toUTCString() : '') + // Add expiration date
+  (domain   ? ';domain=' + domain : '') +                                          // Add domain
+  (path     ? ';path='   + path   : '') +                                          // Add path
+  (secure   ? ';secure'           : '') +                                          // Add secure option
+  (httponly ? ';httponly'         : '');                                           // Add httponly option
+};
+
+exports.get = function(name) {
+  var cookies = document.cookie.split(';');
+
+  // Iterate all cookies
+  for(var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i];
+    var cookieLength = cookie.length;
+
+    // Determine separator index ("name=value")
+    var separatorIndex = cookie.indexOf('=');
+
+    // IE<11 emits the equal sign when the cookie value is empty
+    separatorIndex = separatorIndex < 0 ? cookieLength : separatorIndex;
+
+    // Decode the cookie name and remove any leading/trailing spaces, then compare to the requested cookie name
+    if (decodeURIComponent(cookie.substring(0, separatorIndex).replace(/^\s+|\s+$/g, '')) == name) {
+      return decodeURIComponent(cookie.substring(separatorIndex + 1, cookieLength));
+    }
+  }
+
+  return null;
+};
+
+exports.erase = function(name, options) {
+  exports.set(name, '', {
+    expires:  -1,
+    domain:   options && options.domain,
+    path:     options && options.path,
+    secure:   0,
+    httponly: 0}
+  );
+};
+
+},{}],2:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -359,7 +428,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":6}],2:[function(require,module,exports){
+},{"util/":7}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -662,7 +731,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -687,7 +756,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -747,14 +816,14 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1344,7 +1413,138 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":5,"_process":4,"inherits":3}],7:[function(require,module,exports){
+},{"./support/isBuffer":6,"_process":5,"inherits":4}],8:[function(require,module,exports){
+var extend = require("extend");
+
+// This is mostly silly, as it's just a wrapper around extend with deep always true
+// takes 2-n objects
+// returns 1 object
+var _objectSmash = function() {
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift(true);
+  return extend.apply(extend, args);
+};
+
+// This extends, but uses root level keys as if they're different objects
+// takes 1-n objects
+// returns either 1 object (if only 1 given) or a bunch of objects in an array
+var _keySmash = function() {
+  var res = [];
+  for(var i = 0 ; i < arguments.length ; i++) {
+    var args = [true];
+    for (var prop in arguments[i]) {
+      args.push(arguments[i][prop]);
+    }
+    res.push(extend.apply(extend, args));
+  }
+  return (res.length == 1) ? res[0] : res;
+};
+
+// This does both, first calling keySmash on each object,
+// and then objectSmash-ing them all together
+// takes 2-n objects
+// returns 1 object
+var _hulkSmash = function() {
+  return _objectSmash.apply(null, _keySmash.apply(null, arguments));
+};
+
+// add the objects and keys apis
+_hulkSmash.objects = _objectSmash;
+_hulkSmash.keys = _keySmash;
+
+module.exports = _hulkSmash;
+},{"extend":9}],9:[function(require,module,exports){
+var hasOwn = Object.prototype.hasOwnProperty;
+var toStr = Object.prototype.toString;
+var undefined;
+
+var isArray = function isArray(arr) {
+	if (typeof Array.isArray === 'function') {
+		return Array.isArray(arr);
+	}
+
+	return toStr.call(arr) === '[object Array]';
+};
+
+var isPlainObject = function isPlainObject(obj) {
+	'use strict';
+	if (!obj || toStr.call(obj) !== '[object Object]') {
+		return false;
+	}
+
+	var has_own_constructor = hasOwn.call(obj, 'constructor');
+	var has_is_property_of_method = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
+	// Not own constructor property must be Object
+	if (obj.constructor && !has_own_constructor && !has_is_property_of_method) {
+		return false;
+	}
+
+	// Own properties are enumerated firstly, so to speed up,
+	// if last one is own, then all properties are own.
+	var key;
+	for (key in obj) {}
+
+	return key === undefined || hasOwn.call(obj, key);
+};
+
+module.exports = function extend() {
+	'use strict';
+	var options, name, src, copy, copyIsArray, clone,
+		target = arguments[0],
+		i = 1,
+		length = arguments.length,
+		deep = false;
+
+	// Handle a deep copy situation
+	if (typeof target === 'boolean') {
+		deep = target;
+		target = arguments[1] || {};
+		// skip the boolean and the target
+		i = 2;
+	} else if ((typeof target !== 'object' && typeof target !== 'function') || target == null) {
+		target = {};
+	}
+
+	for (; i < length; ++i) {
+		options = arguments[i];
+		// Only deal with non-null/undefined values
+		if (options != null) {
+			// Extend the base object
+			for (name in options) {
+				src = target[name];
+				copy = options[name];
+
+				// Prevent never-ending loop
+				if (target === copy) {
+					continue;
+				}
+
+				// Recurse if we're merging plain objects or arrays
+				if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
+					if (copyIsArray) {
+						copyIsArray = false;
+						clone = src && isArray(src) ? src : [];
+					} else {
+						clone = src && isPlainObject(src) ? src : {};
+					}
+
+					// Never move original objects, clone them
+					target[name] = extend(deep, clone, copy);
+
+				// Don't bring in undefined values
+				} else if (copy !== undefined) {
+					target[name] = copy;
+				}
+			}
+		}
+	}
+
+	// Return the modified object
+	return target;
+};
+
+
+},{}],10:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1358,7 +1558,7 @@ if ('_sockjs_onload' in global) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./main":20,"./transport-list":22}],8:[function(require,module,exports){
+},{"./main":23,"./transport-list":25}],11:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -1377,7 +1577,7 @@ inherits(CloseEvent, Event);
 
 module.exports = CloseEvent;
 
-},{"./event":10,"inherits":62}],9:[function(require,module,exports){
+},{"./event":13,"inherits":66}],12:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -1430,7 +1630,7 @@ EventEmitter.prototype.removeListener = EventTarget.prototype.removeEventListene
 
 module.exports.EventEmitter = EventEmitter;
 
-},{"./eventtarget":11,"inherits":62}],10:[function(require,module,exports){
+},{"./eventtarget":14,"inherits":66}],13:[function(require,module,exports){
 'use strict';
 
 function Event(eventType) {
@@ -1454,7 +1654,7 @@ Event.BUBBLING_PHASE  = 3;
 
 module.exports = Event;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 /* Simplified implementation of DOM2 EventTarget.
@@ -1516,7 +1716,7 @@ EventTarget.prototype.dispatchEvent = function(event) {
 
 module.exports = EventTarget;
 
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -1533,7 +1733,7 @@ inherits(TransportMessageEvent, Event);
 
 module.exports = TransportMessageEvent;
 
-},{"./event":10,"inherits":62}],13:[function(require,module,exports){
+},{"./event":13,"inherits":66}],16:[function(require,module,exports){
 'use strict';
 
 var JSON3 = require('json3')
@@ -1562,7 +1762,7 @@ FacadeJS.prototype._close = function() {
 
 module.exports = FacadeJS;
 
-},{"./utils/iframe":53,"json3":63}],14:[function(require,module,exports){
+},{"./utils/iframe":56,"json3":67}],17:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1668,7 +1868,7 @@ module.exports = function(SockJS, availableTransports) {
 };
 
 }).call(this,require('_process'))
-},{"./facade":13,"./info-iframe-receiver":16,"./location":19,"./utils/event":52,"./utils/iframe":53,"./utils/url":57,"_process":4,"debug":59,"json3":63}],15:[function(require,module,exports){
+},{"./facade":16,"./info-iframe-receiver":19,"./location":22,"./utils/event":55,"./utils/iframe":56,"./utils/url":61,"_process":5,"debug":63,"json3":67}],18:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1721,7 +1921,7 @@ InfoAjax.prototype.close = function() {
 module.exports = InfoAjax;
 
 }).call(this,require('_process'))
-},{"./utils/object":54,"_process":4,"debug":59,"events":9,"inherits":62,"json3":63}],16:[function(require,module,exports){
+},{"./utils/object":58,"_process":5,"debug":63,"events":12,"inherits":66,"json3":67}],19:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -1756,7 +1956,7 @@ InfoReceiverIframe.prototype.close = function() {
 
 module.exports = InfoReceiverIframe;
 
-},{"./info-ajax":15,"./transport/sender/xhr-local":43,"events":9,"inherits":62,"json3":63}],17:[function(require,module,exports){
+},{"./info-ajax":18,"./transport/sender/xhr-local":46,"events":12,"inherits":66,"json3":67}],20:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -1829,7 +2029,7 @@ InfoIframe.prototype.close = function() {
 module.exports = InfoIframe;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./info-iframe-receiver":16,"./transport/iframe":28,"./utils/event":52,"_process":4,"debug":59,"events":9,"inherits":62,"json3":63}],18:[function(require,module,exports){
+},{"./info-iframe-receiver":19,"./transport/iframe":31,"./utils/event":55,"_process":5,"debug":63,"events":12,"inherits":66,"json3":67}],21:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1922,7 +2122,7 @@ InfoReceiver.timeout = 8000;
 module.exports = InfoReceiver;
 
 }).call(this,require('_process'))
-},{"./info-ajax":15,"./info-iframe":17,"./transport/sender/xdr":40,"./transport/sender/xhr-cors":41,"./transport/sender/xhr-fake":42,"./transport/sender/xhr-local":43,"./utils/url":57,"_process":4,"debug":59,"events":9,"inherits":62}],19:[function(require,module,exports){
+},{"./info-ajax":18,"./info-iframe":20,"./transport/sender/xdr":43,"./transport/sender/xhr-cors":44,"./transport/sender/xhr-fake":45,"./transport/sender/xhr-local":46,"./utils/url":61,"_process":5,"debug":63,"events":12,"inherits":66}],22:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1936,7 +2136,7 @@ module.exports = global.location || {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -1952,6 +2152,7 @@ var URL = require('url-parse')
   , transport = require('./utils/transport')
   , objectUtils = require('./utils/object')
   , browser = require('./utils/browser')
+  , log = require('./utils/log')
   , Event = require('./event/event')
   , EventTarget = require('./event/eventtarget')
   , loc = require('./location')
@@ -1985,6 +2186,9 @@ function SockJS(url, protocols, options) {
 
   // non-standard extension
   options = options || {};
+  if (options.protocols_whitelist) {
+    log.warn("'protocols_whitelist' is DEPRECATED. Use 'transports' instead.");
+  }
   this._transportsWhitelist = options.transports;
   this._server = options.server || random.numberString(1000);
 
@@ -2028,16 +2232,10 @@ function SockJS(url, protocols, options) {
   this._origin = o ? o.toLowerCase() : null;
 
   // remove the trailing slash
-  parsedUrl.path = parsedUrl.pathname.replace(/[/]+$/, '') + (parsedUrl.query || '');
-
-  // basic authentication
-  parsedUrl.auth = parsedUrl.username
-    ? parsedUrl.username + ':' + parsedUrl.password + '@'
-    : '';
+  parsedUrl.set('pathname', parsedUrl.pathname.replace(/\/+$/, ''));
 
   // store the sanitized url
-  this.url = parsedUrl.protocol + '//' + parsedUrl.auth + parsedUrl.hostname +
-    (parsedUrl.port ? ':' + parsedUrl.port : '') + parsedUrl.path;
+  this.url = parsedUrl.href;
   debug('using url', this.url);
 
   // Step 7 - start connection in background
@@ -2146,11 +2344,11 @@ SockJS.prototype._connect = function() {
 
     var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + random.string(8));
     debug('transport url', transportUrl);
-    var transport = new Transport(transportUrl, this._transUrl);
-    transport.on('message', this._transportMessage.bind(this));
-    transport.once('close', this._transportClose.bind(this));
-    transport.transportName = Transport.transportName;
-    this._transport = transport;
+    var transportObj = new Transport(transportUrl, this._transUrl);
+    transportObj.on('message', this._transportMessage.bind(this));
+    transportObj.once('close', this._transportClose.bind(this));
+    transportObj.transportName = Transport.transportName;
+    this._transport = transportObj;
 
     return;
   }
@@ -2160,7 +2358,7 @@ SockJS.prototype._connect = function() {
 SockJS.prototype._transportTimeout = function() {
   debug('_transportTimeout');
   if (this.readyState === SockJS.CONNECTING) {
-    this._close(2007, 'Transport timed out');
+    this._transportClose(2007, 'Transport timed out');
   }
 };
 
@@ -2311,7 +2509,7 @@ module.exports = function(availableTransports) {
 };
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./event/close":8,"./event/event":10,"./event/eventtarget":11,"./event/trans-message":12,"./iframe-bootstrap":14,"./info-receiver":18,"./location":19,"./shims":21,"./utils/browser":50,"./utils/escape":51,"./utils/event":52,"./utils/object":54,"./utils/random":55,"./utils/transport":56,"./utils/url":57,"./version":58,"_process":4,"debug":59,"inherits":62,"json3":63,"url-parse":64}],21:[function(require,module,exports){
+},{"./event/close":11,"./event/event":13,"./event/eventtarget":14,"./event/trans-message":15,"./iframe-bootstrap":17,"./info-receiver":21,"./location":22,"./shims":24,"./utils/browser":53,"./utils/escape":54,"./utils/event":55,"./utils/log":57,"./utils/object":58,"./utils/random":59,"./utils/transport":60,"./utils/url":61,"./version":62,"_process":5,"debug":63,"inherits":66,"json3":67,"url-parse":68}],24:[function(require,module,exports){
 /* eslint-disable */
 /* jscs: disable */
 'use strict';
@@ -2786,7 +2984,7 @@ defineProperties(StringPrototype, {
     }
 }, hasNegativeSubstrBug);
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 module.exports = [
@@ -2806,7 +3004,7 @@ module.exports = [
 , require('./transport/jsonp-polling')
 ];
 
-},{"./transport/eventsource":26,"./transport/htmlfile":27,"./transport/jsonp-polling":29,"./transport/lib/iframe-wrap":32,"./transport/websocket":44,"./transport/xdr-polling":45,"./transport/xdr-streaming":46,"./transport/xhr-polling":47,"./transport/xhr-streaming":48}],23:[function(require,module,exports){
+},{"./transport/eventsource":29,"./transport/htmlfile":30,"./transport/jsonp-polling":32,"./transport/lib/iframe-wrap":35,"./transport/websocket":47,"./transport/xdr-polling":48,"./transport/xdr-streaming":49,"./transport/xhr-polling":50,"./transport/xhr-streaming":51}],26:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -2995,17 +3193,17 @@ AbstractXHRObject.supportsCORS = cors;
 module.exports = AbstractXHRObject;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/event":52,"../../utils/url":57,"_process":4,"debug":59,"events":9,"inherits":62}],24:[function(require,module,exports){
+},{"../../utils/event":55,"../../utils/url":61,"_process":5,"debug":63,"events":12,"inherits":66}],27:[function(require,module,exports){
 (function (global){
 module.exports = global.EventSource;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 module.exports = global.WebSocket || global.MozWebSocket;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -3034,7 +3232,7 @@ EventSourceTransport.roundTrips = 2;
 
 module.exports = EventSourceTransport;
 
-},{"./lib/ajax-based":30,"./receiver/eventsource":35,"./sender/xhr-cors":41,"eventsource":24,"inherits":62}],27:[function(require,module,exports){
+},{"./lib/ajax-based":33,"./receiver/eventsource":38,"./sender/xhr-cors":44,"eventsource":27,"inherits":66}],30:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -3061,7 +3259,7 @@ HtmlFileTransport.roundTrips = 2;
 
 module.exports = HtmlFileTransport;
 
-},{"./lib/ajax-based":30,"./receiver/htmlfile":36,"./sender/xhr-local":43,"inherits":62}],28:[function(require,module,exports){
+},{"./lib/ajax-based":33,"./receiver/htmlfile":39,"./sender/xhr-local":46,"inherits":66}],31:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3204,7 +3402,7 @@ IframeTransport.roundTrips = 2;
 module.exports = IframeTransport;
 
 }).call(this,require('_process'))
-},{"../utils/event":52,"../utils/iframe":53,"../utils/random":55,"../utils/url":57,"../version":58,"_process":4,"debug":59,"events":9,"inherits":62,"json3":63}],29:[function(require,module,exports){
+},{"../utils/event":55,"../utils/iframe":56,"../utils/random":59,"../utils/url":61,"../version":62,"_process":5,"debug":63,"events":12,"inherits":66,"json3":67}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3242,7 +3440,7 @@ JsonPTransport.needBody = true;
 module.exports = JsonPTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/sender-receiver":34,"./receiver/jsonp":37,"./sender/jsonp":39,"inherits":62}],30:[function(require,module,exports){
+},{"./lib/sender-receiver":37,"./receiver/jsonp":40,"./sender/jsonp":42,"inherits":66}],33:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3295,7 +3493,7 @@ inherits(AjaxBasedTransport, SenderReceiver);
 module.exports = AjaxBasedTransport;
 
 }).call(this,require('_process'))
-},{"../../utils/url":57,"./sender-receiver":34,"_process":4,"debug":59,"inherits":62}],31:[function(require,module,exports){
+},{"../../utils/url":61,"./sender-receiver":37,"_process":5,"debug":63,"inherits":66}],34:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3386,7 +3584,7 @@ BufferedSender.prototype.stop = function() {
 module.exports = BufferedSender;
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59,"events":9,"inherits":62}],32:[function(require,module,exports){
+},{"_process":5,"debug":63,"events":12,"inherits":66}],35:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3423,7 +3621,7 @@ module.exports = function(transport) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/object":54,"../iframe":28,"inherits":62}],33:[function(require,module,exports){
+},{"../../utils/object":58,"../iframe":31,"inherits":66}],36:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3484,7 +3682,7 @@ Polling.prototype.abort = function() {
 module.exports = Polling;
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59,"events":9,"inherits":62}],34:[function(require,module,exports){
+},{"_process":5,"debug":63,"events":12,"inherits":66}],37:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3533,7 +3731,7 @@ SenderReceiver.prototype.close = function() {
 module.exports = SenderReceiver;
 
 }).call(this,require('_process'))
-},{"../../utils/url":57,"./buffered-sender":31,"./polling":33,"_process":4,"debug":59,"inherits":62}],35:[function(require,module,exports){
+},{"../../utils/url":61,"./buffered-sender":34,"./polling":36,"_process":5,"debug":63,"inherits":66}],38:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3600,7 +3798,7 @@ EventSourceReceiver.prototype._close = function(reason) {
 module.exports = EventSourceReceiver;
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59,"events":9,"eventsource":24,"inherits":62}],36:[function(require,module,exports){
+},{"_process":5,"debug":63,"events":12,"eventsource":27,"inherits":66}],39:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -3689,7 +3887,7 @@ HtmlfileReceiver.enabled = HtmlfileReceiver.htmlfileEnabled || iframeUtils.ifram
 module.exports = HtmlfileReceiver;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/iframe":53,"../../utils/random":55,"../../utils/url":57,"_process":4,"debug":59,"events":9,"inherits":62}],37:[function(require,module,exports){
+},{"../../utils/iframe":56,"../../utils/random":59,"../../utils/url":61,"_process":5,"debug":63,"events":12,"inherits":66}],40:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -3872,7 +4070,7 @@ JsonpReceiver.prototype._createScript = function(url) {
 module.exports = JsonpReceiver;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":50,"../../utils/iframe":53,"../../utils/random":55,"../../utils/url":57,"_process":4,"debug":59,"events":9,"inherits":62}],38:[function(require,module,exports){
+},{"../../utils/browser":53,"../../utils/iframe":56,"../../utils/random":59,"../../utils/url":61,"_process":5,"debug":63,"events":12,"inherits":66}],41:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3946,7 +4144,7 @@ XhrReceiver.prototype.abort = function() {
 module.exports = XhrReceiver;
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59,"events":9,"inherits":62}],39:[function(require,module,exports){
+},{"_process":5,"debug":63,"events":12,"inherits":66}],42:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -4049,7 +4247,7 @@ module.exports = function(url, payload, callback) {
 };
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/random":55,"../../utils/url":57,"_process":4,"debug":59}],40:[function(require,module,exports){
+},{"../../utils/random":59,"../../utils/url":61,"_process":5,"debug":63}],43:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -4154,7 +4352,7 @@ XDRObject.enabled = !!(global.XDomainRequest && browser.hasDomain());
 module.exports = XDRObject;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":50,"../../utils/event":52,"../../utils/url":57,"_process":4,"debug":59,"events":9,"inherits":62}],41:[function(require,module,exports){
+},{"../../utils/browser":53,"../../utils/event":55,"../../utils/url":61,"_process":5,"debug":63,"events":12,"inherits":66}],44:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -4171,7 +4369,7 @@ XHRCorsObject.enabled = XhrDriver.enabled && XhrDriver.supportsCORS;
 
 module.exports = XHRCorsObject;
 
-},{"../driver/xhr":23,"inherits":62}],42:[function(require,module,exports){
+},{"../driver/xhr":26,"inherits":66}],45:[function(require,module,exports){
 'use strict';
 
 var EventEmitter = require('events').EventEmitter
@@ -4197,7 +4395,7 @@ XHRFake.timeout = 2000;
 
 module.exports = XHRFake;
 
-},{"events":9,"inherits":62}],43:[function(require,module,exports){
+},{"events":12,"inherits":66}],46:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -4216,7 +4414,7 @@ XHRLocalObject.enabled = XhrDriver.enabled;
 
 module.exports = XHRLocalObject;
 
-},{"../driver/xhr":23,"inherits":62}],44:[function(require,module,exports){
+},{"../driver/xhr":26,"inherits":66}],47:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -4318,7 +4516,7 @@ WebSocketTransport.roundTrips = 2;
 module.exports = WebSocketTransport;
 
 }).call(this,require('_process'))
-},{"../utils/event":52,"../utils/url":57,"./driver/websocket":25,"_process":4,"debug":59,"events":9,"inherits":62}],45:[function(require,module,exports){
+},{"../utils/event":55,"../utils/url":61,"./driver/websocket":28,"_process":5,"debug":63,"events":12,"inherits":66}],48:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -4343,7 +4541,7 @@ XdrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrPollingTransport;
 
-},{"./lib/ajax-based":30,"./receiver/xhr":38,"./sender/xdr":40,"./xdr-streaming":46,"inherits":62}],46:[function(require,module,exports){
+},{"./lib/ajax-based":33,"./receiver/xhr":41,"./sender/xdr":43,"./xdr-streaming":49,"inherits":66}],49:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -4377,7 +4575,7 @@ XdrStreamingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrStreamingTransport;
 
-},{"./lib/ajax-based":30,"./receiver/xhr":38,"./sender/xdr":40,"inherits":62}],47:[function(require,module,exports){
+},{"./lib/ajax-based":33,"./receiver/xhr":41,"./sender/xdr":43,"inherits":66}],50:[function(require,module,exports){
 'use strict';
 
 var inherits = require('inherits')
@@ -4412,7 +4610,7 @@ XhrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XhrPollingTransport;
 
-},{"./lib/ajax-based":30,"./receiver/xhr":38,"./sender/xhr-cors":41,"./sender/xhr-local":43,"inherits":62}],48:[function(require,module,exports){
+},{"./lib/ajax-based":33,"./receiver/xhr":41,"./sender/xhr-cors":44,"./sender/xhr-local":46,"inherits":66}],51:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4457,7 +4655,7 @@ XhrStreamingTransport.needBody = !!global.document;
 module.exports = XhrStreamingTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils/browser":50,"./lib/ajax-based":30,"./receiver/xhr":38,"./sender/xhr-cors":41,"./sender/xhr-local":43,"inherits":62}],49:[function(require,module,exports){
+},{"../utils/browser":53,"./lib/ajax-based":33,"./receiver/xhr":41,"./sender/xhr-cors":44,"./sender/xhr-local":46,"inherits":66}],52:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4478,7 +4676,7 @@ if (global.crypto && global.crypto.getRandomValues) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4509,7 +4707,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 var JSON3 = require('json3');
@@ -4560,7 +4758,7 @@ module.exports = {
   }
 };
 
-},{"json3":63}],52:[function(require,module,exports){
+},{"json3":67}],55:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4629,7 +4827,7 @@ var unloadTriggered = function() {
 module.exports.attachEvent('unload', unloadTriggered);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./random":55}],53:[function(require,module,exports){
+},{"./random":59}],56:[function(require,module,exports){
 (function (process,global){
 'use strict';
 
@@ -4814,7 +5012,22 @@ if (global.document) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./browser":50,"./event":52,"_process":4,"debug":59,"json3":63}],54:[function(require,module,exports){
+},{"./browser":53,"./event":55,"_process":5,"debug":63,"json3":67}],57:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var logObject = {};
+['log', 'debug', 'warn'].forEach(function (level) {
+  var levelExists = global.console && global.console[level] && global.console[level].apply;
+  logObject[level] = levelExists ? function () {
+    return global.console[level].apply(global.console, arguments);
+  } : (level === 'log' ? function () {} : logObject.log);
+});
+
+module.exports = logObject;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],58:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -4840,7 +5053,7 @@ module.exports = {
   }
 };
 
-},{}],55:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 /* global crypto:true */
@@ -4871,7 +5084,7 @@ module.exports = {
   }
 };
 
-},{"crypto":49}],56:[function(require,module,exports){
+},{"crypto":52}],60:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -4925,7 +5138,7 @@ module.exports = function(availableTransports) {
 };
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59}],57:[function(require,module,exports){
+},{"_process":5,"debug":63}],61:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -4976,9 +5189,9 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"_process":4,"debug":59,"url-parse":64}],58:[function(require,module,exports){
-module.exports = '1.0.0-beta.12';
-},{}],59:[function(require,module,exports){
+},{"_process":5,"debug":63,"url-parse":68}],62:[function(require,module,exports){
+module.exports = '1.0.0';
+},{}],63:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -4992,17 +5205,10 @@ exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
-
-/**
- * Use chrome.storage.local if we are in an app
- */
-
-var storage;
-
-if (typeof chrome !== 'undefined' && typeof chrome.storage !== 'undefined')
-  storage = chrome.storage.local;
-else
-  storage = localstorage();
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
 
 /**
  * Colors.
@@ -5110,9 +5316,9 @@ function log() {
 function save(namespaces) {
   try {
     if (null == namespaces) {
-      storage.removeItem('debug');
+      exports.storage.removeItem('debug');
     } else {
-      storage.debug = namespaces;
+      exports.storage.debug = namespaces;
     }
   } catch(e) {}
 }
@@ -5127,7 +5333,7 @@ function save(namespaces) {
 function load() {
   var r;
   try {
-    r = storage.debug;
+    r = exports.storage.debug;
   } catch(e) {}
   return r;
 }
@@ -5155,7 +5361,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":60}],60:[function(require,module,exports){
+},{"./debug":64}],64:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -5354,7 +5560,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":61}],61:[function(require,module,exports){
+},{"ms":65}],65:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -5395,6 +5601,8 @@ module.exports = function(val, options){
  */
 
 function parse(str) {
+  str = '' + str;
+  if (str.length > 10000) return;
   var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
   if (!match) return;
   var n = parseFloat(match[1]);
@@ -5479,9 +5687,9 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],62:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],63:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"dup":4}],67:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -6387,7 +6595,7 @@ arguments[4][3][0].apply(exports,arguments)
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],64:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var required = require('requires-port')
@@ -6587,7 +6795,11 @@ URL.prototype.toString = function toString(stringify) {
     , url = this
     , result = url.protocol +'//';
 
-  if (url.username) result += url.username +':'+ url.password +'@';
+  if (url.username) {
+    result += url.username;
+    if (url.password) result += ':'+ url.password;
+    result += '@';
+  }
 
   result += url.hostname;
   if (url.port) result += ':'+ url.port;
@@ -6614,7 +6826,7 @@ URL.qs = qs;
 URL.location = lolcation;
 module.exports = URL;
 
-},{"./lolcation":65,"querystringify":66,"requires-port":67}],65:[function(require,module,exports){
+},{"./lolcation":69,"querystringify":70,"requires-port":71}],69:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -6663,7 +6875,7 @@ module.exports = function lolcation(loc) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./":64}],66:[function(require,module,exports){
+},{"./":68}],70:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty;
@@ -6717,7 +6929,7 @@ function querystringify(obj, prefix) {
     }
   }
 
-  return prefix + pairs.join('&');
+  return pairs.length ? prefix + pairs.join('&') : '';
 }
 
 //
@@ -6726,7 +6938,7 @@ function querystringify(obj, prefix) {
 exports.stringify = querystringify;
 exports.parse = querystring;
 
-},{}],67:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6766,207 +6978,7 @@ module.exports = function required(port, protocol) {
   return port !== 0;
 };
 
-},{}],68:[function(require,module,exports){
-exports.defaults = {};
-
-exports.set = function(name, value, options) {
-  // Retrieve options and defaults
-  var opts = options || {};
-  var defaults = exports.defaults;
-
-  // Apply default value for unspecified options
-  var expires  = opts.expires || defaults.expires;
-  var domain   = opts.domain  || defaults.domain;
-  var path     = opts.path     != undefined ? opts.path     : (defaults.path != undefined ? defaults.path : '/');
-  var secure   = opts.secure   != undefined ? opts.secure   : defaults.secure;
-  var httponly = opts.httponly != undefined ? opts.httponly : defaults.httponly;
-
-  // Determine cookie expiration date
-  // If succesful the result will be a valid Date, otherwise it will be an invalid Date or false(ish)
-  var expDate = expires ? new Date(
-      // in case expires is an integer, it should specify the number of days till the cookie expires
-      typeof expires == 'number' ? new Date().getTime() + (expires * 864e5) :
-      // else expires should be either a Date object or in a format recognized by Date.parse()
-      expires
-  ) : '';
-
-  // Set cookie
-  document.cookie = name.replace(/[^+#$&^`|]/g, encodeURIComponent)                // Encode cookie name
-  .replace('(', '%28')
-  .replace(')', '%29') +
-  '=' + value.replace(/[^+#$&/:<-\[\]-}]/g, encodeURIComponent) +                  // Encode cookie value (RFC6265)
-  (expDate && expDate.getTime() >= 0 ? ';expires=' + expDate.toUTCString() : '') + // Add expiration date
-  (domain   ? ';domain=' + domain : '') +                                          // Add domain
-  (path     ? ';path='   + path   : '') +                                          // Add path
-  (secure   ? ';secure'           : '') +                                          // Add secure option
-  (httponly ? ';httponly'         : '');                                           // Add httponly option
-};
-
-exports.get = function(name) {
-  var cookies = document.cookie.split(';');
-
-  // Iterate all cookies
-  for(var i = 0; i < cookies.length; i++) {
-    var cookie = cookies[i];
-    var cookieLength = cookie.length;
-
-    // Determine separator index ("name=value")
-    var separatorIndex = cookie.indexOf('=');
-
-    // IE<11 emits the equal sign when the cookie value is empty
-    separatorIndex = separatorIndex < 0 ? cookieLength : separatorIndex;
-
-    // Decode the cookie name and remove any leading/trailing spaces, then compare to the requested cookie name
-    if (decodeURIComponent(cookie.substring(0, separatorIndex).replace(/^\s+|\s+$/g, '')) == name) {
-      return decodeURIComponent(cookie.substring(separatorIndex + 1, cookieLength));
-    }
-  }
-
-  return null;
-};
-
-exports.erase = function(name, options) {
-  exports.set(name, '', {
-    expires:  -1,
-    domain:   options && options.domain,
-    path:     options && options.path,
-    secure:   0,
-    httponly: 0}
-  );
-};
-
-},{}],69:[function(require,module,exports){
-var extend = require("extend");
-
-// This is mostly silly, as it's just a wrapper around extend with deep always true
-// takes 2-n objects
-// returns 1 object
-var _objectSmash = function() {
-  var args = Array.prototype.slice.call(arguments);
-  args.unshift(true);
-  return extend.apply(extend, args);
-};
-
-// This extends, but uses root level keys as if they're different objects
-// takes 1-n objects
-// returns either 1 object (if only 1 given) or a bunch of objects in an array
-var _keySmash = function() {
-  var res = [];
-  for(var i = 0 ; i < arguments.length ; i++) {
-    var args = [true];
-    for (var prop in arguments[i]) {
-      args.push(arguments[i][prop]);
-    }
-    res.push(extend.apply(extend, args));
-  }
-  return (res.length == 1) ? res[0] : res;
-};
-
-// This does both, first calling keySmash on each object,
-// and then objectSmash-ing them all together
-// takes 2-n objects
-// returns 1 object
-var _hulkSmash = function() {
-  return _objectSmash.apply(null, _keySmash.apply(null, arguments));
-};
-
-// add the objects and keys apis
-_hulkSmash.objects = _objectSmash;
-_hulkSmash.keys = _keySmash;
-
-module.exports = _hulkSmash;
-},{"extend":70}],70:[function(require,module,exports){
-var hasOwn = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var undefined;
-
-var isArray = function isArray(arr) {
-	if (typeof Array.isArray === 'function') {
-		return Array.isArray(arr);
-	}
-
-	return toStr.call(arr) === '[object Array]';
-};
-
-var isPlainObject = function isPlainObject(obj) {
-	'use strict';
-	if (!obj || toStr.call(obj) !== '[object Object]') {
-		return false;
-	}
-
-	var has_own_constructor = hasOwn.call(obj, 'constructor');
-	var has_is_property_of_method = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
-	// Not own constructor property must be Object
-	if (obj.constructor && !has_own_constructor && !has_is_property_of_method) {
-		return false;
-	}
-
-	// Own properties are enumerated firstly, so to speed up,
-	// if last one is own, then all properties are own.
-	var key;
-	for (key in obj) {}
-
-	return key === undefined || hasOwn.call(obj, key);
-};
-
-module.exports = function extend() {
-	'use strict';
-	var options, name, src, copy, copyIsArray, clone,
-		target = arguments[0],
-		i = 1,
-		length = arguments.length,
-		deep = false;
-
-	// Handle a deep copy situation
-	if (typeof target === 'boolean') {
-		deep = target;
-		target = arguments[1] || {};
-		// skip the boolean and the target
-		i = 2;
-	} else if ((typeof target !== 'object' && typeof target !== 'function') || target == null) {
-		target = {};
-	}
-
-	for (; i < length; ++i) {
-		options = arguments[i];
-		// Only deal with non-null/undefined values
-		if (options != null) {
-			// Extend the base object
-			for (name in options) {
-				src = target[name];
-				copy = options[name];
-
-				// Prevent never-ending loop
-				if (target === copy) {
-					continue;
-				}
-
-				// Recurse if we're merging plain objects or arrays
-				if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
-					if (copyIsArray) {
-						copyIsArray = false;
-						clone = src && isArray(src) ? src : [];
-					} else {
-						clone = src && isPlainObject(src) ? src : {};
-					}
-
-					// Never move original objects, clone them
-					target[name] = extend(deep, clone, copy);
-
-				// Don't bring in undefined values
-				} else if (copy !== undefined) {
-					target[name] = copy;
-				}
-			}
-		}
-	}
-
-	// Return the modified object
-	return target;
-};
-
-
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -7001,7 +7013,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -7186,135 +7198,13 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":71}],73:[function(require,module,exports){
-var assert = require('assert');
-
-// represents the type of possible messages
-var types = {
-  upvote: "upvote",
-  downvote: "downvote",
-  votecount: "votecount",
-  votepercent: "votepercent",
-  identify: "identify",
-  reset: "reset",
-  consume: "consume",
-  usercount: "usercount",
-  notfound: "notfound",
-  success: "success",
-  failure: "failure",
-  version: "version",
-  nostatus: "nostatus",
-  bot: "bot"
-};
-
-// determines if a given object is a valid protocol object
-function isValid (_data) {
-  try {
-    var _parsed = unpack(_data);
-    assert(_parsed.hasOwnProperty(status()), "data has no property "+status());
-    assert(_parsed.hasOwnProperty(type()), "data has no property "+type());
-    assert(_parsed.hasOwnProperty(seq()), "data has no property "+seq());
-    assert(_parsed.hasOwnProperty(data()), "data has no property "+data());
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
-// unpacks a protocol compatible message
-function unpack (data) {
-  return JSON.parse(data);
-};
-
-// gets an objects type field
-// or
-// determines the property name of the type field
-function type (data) {
-  if (data) {
-    return data.type||"";
-  } else {
-    return "type";
-  }
-}
-
-// gets an objects data field
-// or
-// determines the property name of the data field
-function data (data) {
-  if (data) {
-    return data.data||"";
-  } else {
-    return "data";
-  }
-}
-
-// gets an objects seq field
-// or
-// determines the property name of the seq field
-function seq (data) {
-  if (data) {
-    return data.seq||"";
-  } else {
-    return "seq";
-  }
-}
-
-function status (data) {
-  if (data) {
-    return data.status ||"";
-  } else {
-    return "status";
-  }
-}
-
-// packs a protocol compatible message
-function pack (_status, _type, _seq, _data) {
-  var result = {};
-  result[status()] = _status;
-  result[type()] = _type;
-  result[seq()] = _seq;
-  result[data()] = _data||{};
-  return JSON.stringify(result);
-}
-
-// writes a successful message to a given connection
-function succeed (conn, type, seq, optionalData) {
-  var msg = pack(types.success, type, seq, optionalData);
-  console.log("------------DATA OUT------------");
-  console.log(msg);
-  console.log("--------------------------------");
-  conn.write(msg);
-};
-
-// writes a failure message to a given connection
-function fail (conn, type, seq, optionalData) {
-  var msg = pack(types.failure, type, seq, optionalData);
-  console.log("------------DATA OUT------------");
-  console.log(msg);
-  console.log("--------------------------------");
-  conn.write(msg);
-};
-
-module.exports = {
-  types: types,
-  isValid: isValid,
-  unpack: unpack,
-  status: status,
-  type: type,
-  data: data,
-  seq: seq,
-  pack: pack,
-  succeed: succeed,
-  fail: fail,
-  VERSION: "0.1.0"
-};
-},{"assert":1}],"voter":[function(require,module,exports){
+},{"./rng":72}],74:[function(require,module,exports){
 var protocol = require('../protocol');
 var sockjs = require('sockjs-client');
 var assert = require('assert');
 var util = require('util');
 var uuid = require('uuid');
-var cookies = require('browser-cookies');
+var cookies = require('browser-cookies-shim');
 var hs = require('hulksmash');
 var EventEmitter = require('events').EventEmitter;
 
@@ -7483,4 +7373,127 @@ Voter.prototype.VERSION = protocol.VERSION;
 
 // export client functionality as ctor
 module.exports = Voter;
-},{"../protocol":73,"assert":1,"browser-cookies":68,"events":2,"hulksmash":69,"sockjs-client":7,"util":6,"uuid":72}]},{},[]);
+},{"../protocol":75,"assert":2,"browser-cookies-shim":1,"events":3,"hulksmash":8,"sockjs-client":10,"util":7,"uuid":73}],75:[function(require,module,exports){
+var assert = require('assert');
+
+// represents the type of possible messages
+var types = {
+  upvote: "upvote",
+  downvote: "downvote",
+  votecount: "votecount",
+  votepercent: "votepercent",
+  identify: "identify",
+  reset: "reset",
+  consume: "consume",
+  usercount: "usercount",
+  notfound: "notfound",
+  success: "success",
+  failure: "failure",
+  version: "version",
+  nostatus: "nostatus",
+  bot: "bot"
+};
+
+// determines if a given object is a valid protocol object
+function isValid (_data) {
+  try {
+    var _parsed = unpack(_data);
+    assert(_parsed.hasOwnProperty(status()), "data has no property "+status());
+    assert(_parsed.hasOwnProperty(type()), "data has no property "+type());
+    assert(_parsed.hasOwnProperty(seq()), "data has no property "+seq());
+    assert(_parsed.hasOwnProperty(data()), "data has no property "+data());
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+// unpacks a protocol compatible message
+function unpack (data) {
+  return JSON.parse(data);
+};
+
+// gets an objects type field
+// or
+// determines the property name of the type field
+function type (data) {
+  if (data) {
+    return data.type||"";
+  } else {
+    return "type";
+  }
+}
+
+// gets an objects data field
+// or
+// determines the property name of the data field
+function data (data) {
+  if (data) {
+    return data.data||"";
+  } else {
+    return "data";
+  }
+}
+
+// gets an objects seq field
+// or
+// determines the property name of the seq field
+function seq (data) {
+  if (data) {
+    return data.seq||"";
+  } else {
+    return "seq";
+  }
+}
+
+function status (data) {
+  if (data) {
+    return data.status ||"";
+  } else {
+    return "status";
+  }
+}
+
+// packs a protocol compatible message
+function pack (_status, _type, _seq, _data) {
+  var result = {};
+  result[status()] = _status;
+  result[type()] = _type;
+  result[seq()] = _seq;
+  result[data()] = _data||{};
+  return JSON.stringify(result);
+}
+
+// writes a successful message to a given connection
+function succeed (conn, type, seq, optionalData) {
+  var msg = pack(types.success, type, seq, optionalData);
+  console.log("------------DATA OUT------------");
+  console.log(msg);
+  console.log("--------------------------------");
+  conn.write(msg);
+};
+
+// writes a failure message to a given connection
+function fail (conn, type, seq, optionalData) {
+  var msg = pack(types.failure, type, seq, optionalData);
+  console.log("------------DATA OUT------------");
+  console.log(msg);
+  console.log("--------------------------------");
+  conn.write(msg);
+};
+
+module.exports = {
+  types: types,
+  isValid: isValid,
+  unpack: unpack,
+  status: status,
+  type: type,
+  data: data,
+  seq: seq,
+  pack: pack,
+  succeed: succeed,
+  fail: fail,
+  VERSION: "0.1.0"
+};
+},{"assert":2}]},{},[74])(74)
+});
