@@ -5,6 +5,26 @@ var maxSearchItems = 8;
 
 var votes;
 
+var voter = new (require('voter'))("//:3001/vote");
+
+function likeClicked () {
+  var $this = $(this);
+  var uri = $this.attr("data-uri");
+  voter.upvote(uri, function(err, data) {
+    if (err) console.error(err); //TODO do more
+    $this.parent().fadeOut("slow");        
+  });
+}
+
+function skipClicked () {
+  var $this = $(this);
+  var uri = $this.attr("data-uri");
+  voter.downvote(uri, function(err, data) {
+    if (err) console.error(err); //TODO do more
+    $this.parent().fadeOut("slow");
+  });
+}
+
 function queryCurrent() {
   //this is the instance of mopidy
   var instance = this;
@@ -50,8 +70,8 @@ function queryTracklist() {
       try{
         var item = $(".tracklist .item.hidden").clone().hide().removeClass("hidden").appendTo(".tracklist");
         item.find(".track-name").text(tracks[i].track.name);
-        item.find(".like").attr("data-uri", tracks[i].track.uri);
-        item.find(".skip").attr("data-uri", tracks[i].track.uri);
+        item.find(".like").attr("data-uri", tracks[i].track.uri).on('click', likeClicked);
+        item.find(".skip").attr("data-uri", tracks[i].track.uri).on('click', skipClicked);
         item.find(".artist-name").text(tracks[i].track.artists[0].name);
         item.fadeIn("slow");
       } catch(e) { console.error(e); }
@@ -148,20 +168,8 @@ $(document).ready(function() {
 
   var mopidy = new Mopidy({
       webSocketUrl: "ws://"+document.location.host+"/mopidy/ws/"
-  }),
-    cbs = [];
+  });
   
-  votes = new WebSocket("ws://"+document.location.host+"/partify/ws"),
-    
-
-  votes.onmessage = function(evt) {
-    for (var i = 0 ; i < cbs.length; i++)
-      cbs[i](evt);
-  };
-
-  votes.onerror = console.error.bind(console);
-  cbs.push(console.log.bind(console));
-
   mopidy.on(console.log.bind(console)); //4dbg
 
   mopidy.on("state:online", function() {
@@ -209,15 +217,9 @@ $(document).ready(function() {
       
     });
 
-    $(".like").click(function() {
-      var uri = $(this).attr("data-uri");
-      votes.send(JSON.stringify({vtype:"upvote", uri: uri}));
-    });
+    $(".like").click(likeClicked);
 
-    $(".skip").click(function() {
-      var uri = $(this).attr("data-uri");
-      votes.send(JSON.stringify({vtype:"downvote", uri: uri}));
-    });
+    $(".skip").click(skipClicked);
   });
 });
 
@@ -342,9 +344,17 @@ function onSearchItemClick() {
   });
 }
 
-function getAlbumArt(uri, container) {
-  mopidy.library.getImages([uri]).done(function(backends) {
-    $(container).attr("src", backends[uri][0].uri);
+function getAlbumArt(id, container) {
+  if (id.indexOf(":") !== -1) {
+    id = id.split(":");
+    id = id[id.length-1];
+  }
+  
+  // see https://developer.spotify.com/web-api/get-album
+  $.get("https://api.spotify.com/v1/albums/"+id).then(function (data) {
+    
+    // use length-1 hack since last entry is always smallest image (we scale to 48x48 anyway)
+    $(container).attr("src", data.images[data.images.length-1].url);
   });
 }
 
