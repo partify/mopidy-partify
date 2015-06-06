@@ -12,7 +12,7 @@ function likeClicked () {
   var uri = $this.attr("data-uri");
   voter.upvote(uri, function(err, data) {
     if (err) console.error(err); //TODO do more
-    $this.parent().fadeOut("slow");        
+    $this.parent().addClass("hidden");        
   });
 }
 
@@ -21,7 +21,7 @@ function skipClicked () {
   var uri = $this.attr("data-uri");
   voter.downvote(uri, function(err, data) {
     if (err) console.error(err); //TODO do more
-    $this.parent().fadeOut("slow");
+    $this.parent().addClass("hidden");
   });
 }
 
@@ -170,8 +170,6 @@ $(document).ready(function() {
       webSocketUrl: "ws://"+document.location.host+"/mopidy/ws/"
   });
   
-  mopidy.on(console.log.bind(console)); //4dbg
-
   mopidy.on("state:online", function() {
     window.mopidy = mopidy; //4dbg
 
