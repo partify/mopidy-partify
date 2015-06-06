@@ -5,7 +5,7 @@ var maxSearchItems = 8;
 
 var votes;
 
-var voter = new (require('voter'))("//:3001/vote");
+var voter = new Voter("//:3001/vote");
 
 function likeClicked () {
   var $this = $(this);
@@ -206,14 +206,14 @@ $(document).ready(function() {
     });
 
     $(".queue-ui .queue-search").keydown(function(e) {
-      typeAheadTimeout = new Date().getTime()+300;
+      typeAheadTimeout = new Date().getTime()+200;
       var thing = this;
       setTimeout(function() {
         if(new Date().getTime() < typeAheadTimeout) {
         } else {
           search(e, thing);
         }
-      }, 300);
+      }, 200);
       
     });
 
@@ -259,30 +259,34 @@ function search(e, thing) {
     return;
   }
   
-  mopidy.library.search({'any': [term]}).done(function(backends) {
+  // term is what to lookup
+  $.get("https://api.spotify.com/v1/search?type=track&q="+term).then(function (data) {
     $(".queue-results").find(".item:not(.hidden)").remove();
-    //TODO right now, results will almost always stop with backend[0]
-    // because of this total thing
     
-    // iterate backends
-    for (var i = 0 ; i < backends.length; i++) {
-      // iterate tracks
-      if (backends[i].tracks) {
-        for (var j = 0; j < backends[i].tracks.length ; j++) {
-          if (j >= maxSearchItems) break;
-          var item = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
-          
-          item.find(".track-name").text(backends[i].tracks[j].name);
-          item.find(".artist-name").text(backends[i].tracks[j].artists[0].name);          
-          getAlbumArt(backends[i].tracks[j].album.uri, item.find(".album-art"));
-          item.fadeIn("slow");
-
-          // if the song is in the track list, enable the like button
-          //    also, dont add the on click listener
-          isRepeat(backends[i].tracks[j].uri, item);
-          
-          
-        }
+    var items = data.tracks.items;
+    for (var i = 0 ; i < items.length; i++) {
+      if (i > maxSearchItems) return; // return, cause optimize
+      
+      var uri = items[i].uri;
+      var images = items[i].album.images;
+      var name = items[i].name;
+      var artistName = items[i].artists[0].name;
+      
+      var elem = $(".queue-results .item.hidden").clone().hide().removeClass("hidden").appendTo(".queue-results");
+      elem.find('.track-name').text(name);
+      elem.find('.artist-name').text(artistName);
+      
+      if (elem.find('div .album-art').length > 0) {
+        var art = elem.find('div .album-art');
+        
+        try{
+          $(art).attr("src", images[((images.length == 1) ? 0 : images.length -1)].url);
+        } catch (e) {}
+        
+        //isRepeat(uri, elem); // this is slow so let's just not for now
+        elem.fadeIn("slow");
+        
+        elem.attr("data-uri", uri).bind("click", onSearchItemClick);
       }
     }
   });
